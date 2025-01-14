@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Folder, Plus } from 'lucide-react';
+// import { Folder, Plus } from 'lucide-react';
 import AxiosInstance from '../components/AxiosInstance';
 
 export function HomePage() {
@@ -71,7 +71,8 @@ export function HomePage() {
             onClick={handleCreateFolder}
             className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
           >
-            <Plus className="w-4 h-4" />
+            {/* <Plus className="w-4 h-4" /> */}
+            <i class="bi bi-journal-plus w-4 h-4"></i>
             New Folder
           </button>
         </div>
@@ -85,7 +86,8 @@ export function HomePage() {
               className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow cursor-pointer"
             >
               <div className="flex items-center gap-3 mb-3">
-                <Folder className="w-6 h-6 text-blue-500" />
+                {/* <Folder className="w-6 h-6 text-blue-500" /> */}
+                <i className="bi bi-folder w-4 h-4"></i>
                 <h2 className="text-lg font-medium">{folder.name}</h2>
               </div>
               <p className="text-sm text-gray-500">Path: {folder.path}</p>

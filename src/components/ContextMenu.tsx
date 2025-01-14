@@ -12,8 +12,10 @@ interface ContextMenuProps {
   onAddFolder?: () => void;
   onAddDocument?: () => void;
   onDelete: () => void;
+  onRestore: () => void;
   onRename: () => void;
   onChangeIcon: (icon: string) => void;
+  deleted: boolean;
 }
 
 export function ContextMenu({
@@ -25,8 +27,10 @@ export function ContextMenu({
   onAddFolder,
   onAddDocument,
   onDelete,
+  onRestore,
   onRename,
   onChangeIcon,
+  deleted
 }: ContextMenuProps) {
   React.useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -57,14 +61,16 @@ export function ContextMenu({
             onClick={onAddFolder}
             className="w-full px-4 py-2 text-left flex items-center gap-2 hover:bg-gray-100"
           >
-            <FolderPlus className="w-4 h-4" />
+            {/* <FolderPlus className="w-4 h-4" /> */}
+            <i className="bi bi-folder-plus w-4 h-4"></i>
             <span>New Folder</span>
           </button>
           <button
             onClick={onAddDocument}
             className="w-full px-4 py-2 text-left flex items-center gap-2 hover:bg-gray-100"
           >
-            <File className="w-4 h-4" />
+            {/* <File className="w-4 h-4" /> */}
+            <i className="bi bi-file-earmark w-4 h-4"></i>
             <span>New Document</span>
           </button>
           <div className="border-t border-gray-200 my-1" />
@@ -75,7 +81,8 @@ export function ContextMenu({
         onClick={onRename}
         className="w-full px-4 py-2 text-left flex items-center gap-2 hover:bg-gray-100"
       >
-        <Pencil className="w-4 h-4" />
+        {/* <Pencil className="w-4 h-4" /> */}
+        <i className="bi bi-pencil w-4 h-4"></i>
         <span>Rename</span>
       </button>
 
@@ -84,7 +91,8 @@ export function ContextMenu({
           <button
             className="w-full px-4 py-2 text-left flex items-center gap-2 hover:bg-gray-100"
           >
-            <Image className="w-4 h-4" />
+            {/* <Image className="w-4 h-4" /> */}
+            <i className="bi bi-image w-4 h-4"></i>
             <span>Change Icon</span>
           </button>
         </Popover.Trigger>
@@ -101,13 +109,23 @@ export function ContextMenu({
 
       <div className="border-t border-gray-200 my-1" />
       
-      <button
-        onClick={onDelete}
-        className="w-full px-4 py-2 text-left flex items-center gap-2 hover:bg-gray-100 text-red-600"
-      >
-        <Trash2 className="w-4 h-4" />
-        <span>Delete</span>
-      </button>
+      {deleted ? (
+        <button
+          onClick={onRestore}
+          className="w-full px-4 py-2 text-left flex items-center gap-2 hover:bg-gray-100 text-green-600"
+        >
+          <i className="bi bi-arrow-clockwise w-4 h-4"></i>
+          <span>Restore</span>
+        </button>
+      ) : (
+        <button
+          onClick={onDelete}
+          className="w-full px-4 py-2 text-left flex items-center gap-2 hover:bg-gray-100 text-red-600"
+        >
+          <i className="bi bi-trash w-4 h-4"></i>
+          <span>Delete</span>
+        </button>
+      )}
     </div>
   );
 }

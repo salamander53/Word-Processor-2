@@ -1,6 +1,6 @@
 import React from 'react';
 import { Editor as TinyMCEEditor } from '@tinymce/tinymce-react';
-import { Save } from 'lucide-react';
+// import { Save } from 'lucide-react';
 import { Theme } from '../types';
 
 interface EditorProps {
@@ -25,7 +25,8 @@ export function Editor({ content, onChange, onSave, hasUnsavedChanges, theme }: 
         }`}
         style={{ backgroundColor: hasUnsavedChanges ? theme.primary : undefined }}
       >
-        <Save className="w-4 h-4" />
+        {/* <Save className="w-4 h-4" /> */}
+        <i className="bi bi-floppy w-4 h-4"></i>
         {hasUnsavedChanges && <span className="text-sm">Save</span>}
       </button>
 

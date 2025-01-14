@@ -5,8 +5,9 @@ import { Editor } from '../components/Editor';
 import { Header } from '../components/Header';
 import { ThemeCustomizer } from '../components/ThemeCustomizer';
 import { FolderType, Theme } from '../types';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+// import { ChevronLeft, ChevronRight } from 'lucide-react';
 import AxiosInstance from '../components/AxiosInstance';
+import { toast } from 'react-toastify';
 const owner = 'john_doe'
 export function ProjectPage() {
   const location = useLocation();
@@ -122,26 +123,22 @@ export function ProjectPage() {
 
   const handleAddFolder = (parentPath: string) => {
     const newName = 'New Folder';
-    const newPath = `${parentPath}/${newName}`;
+    const newPath = `${parentPath}/new_folder`;
     
-    const newFolder: FolderType = {
-      _id: `folder-${Date.now()}`,
+    const newFolder = {
       name: newName,
       path: newPath,
       isFile: false,
-      deleted: false,
-      owner: 'john_doe',
-      parentPath,
-      children: {}
     };
 
-    setFolders(prev => updateItemInTree(prev, parentPath, {
-      children: {
-        ...prev.children,
-        [newName]: newFolder
-      }
-    }));
-    setExpandedFolders(prev => new Set([...prev, parentPath]));
+    // setFolders(prev => updateItemInTree(prev, parentPath, {
+    //   children: {
+    //     ...prev.children,
+    //     [newName]: newFolder
+    //   }
+    // }));
+    // setExpandedFolders(prev => new Set([...prev, parentPath]));
+    AxiosInstance.post(`folders/create`, newFolder).then((res)=>console.log(res)).catch((err) => toast.error(`Can't create ${newName}. ${err.response.data.message}`))
   };
 
   const handleAddDocument = (parentPath: string) => {
@@ -161,19 +158,22 @@ export function ProjectPage() {
     //   }
     // }));
     // console.log(newDoc)
-    AxiosInstance.post(`folders/create`, newDoc).then((res)=>console.log(res)).catch((err) => console.log(err))
+    AxiosInstance.post(`folders/create`, newDoc).then((res)=>console.log(res)).catch((err) => toast.error(`Can't create ${newName}. ${err.response.data.message}`))
   };
 
-  const handleDelete = (path: string, isFile: boolean) => {
-    setFolders(prev => updateItemInTree(prev, path, { deleted: true }));
-    if (selectedPath === path) {
-      setSelectedPath(null);
-      setCurrentContent('');
-    }
+  const handleDelete =  (path: string, isFile: boolean) => {
+    // setFolders(prev => updateItemInTree(prev, path, { deleted: true }));
+    // if (selectedPath === path) {
+    //   setSelectedPath(null);
+    //   setCurrentContent('');
+    // }
+    // console.log(path)
+     AxiosInstance.post(`folders/delete`, {path: path}).then((res)=>console.log(res))
   };
 
   const handleRestore = (path: string) => {
-    setFolders(prev => updateItemInTree(prev, path, { deleted: false }));
+    // setFolders(prev => updateItemInTree(prev, path, { deleted: false }));
+    AxiosInstance.post(`folders/restore`, {path: path}).then((res)=>console.log(res))
   };
 
   const handleRename = (path: string, newName: string) => {
@@ -187,12 +187,12 @@ export function ProjectPage() {
   const handleChangeIcon = (path: string, icon: string) => {
     setFolders(prev => updateItemInTree(prev, path, { icon }));
   };
-
+// console.log(selectedPath)
   return (
     <div className="flex flex-col h-screen bg-gray-50" style={{ backgroundColor: theme.background }}>
       <Header 
-        onNewFolder={() => handleAddFolder(folders.path)}
-        onNewDocument={() => handleAddDocument(folders.path)}
+        onNewFolder={() => handleAddFolder(selectedPath)}
+        onNewDocument={() => handleAddDocument(selectedPath)}
         selectedPath={selectedPath}
         onToggleTrash={() => setShowDeleted(!showDeleted)}
         showTrash={showDeleted}
@@ -202,7 +202,7 @@ export function ProjectPage() {
           onClick={() => setShowSidebar(!showSidebar)}
           className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-white p-2 rounded-r-md shadow-md z-10"
         >
-          {showSidebar ? <ChevronLeft /> : <ChevronRight />}
+          {showSidebar ? <i className="bi bi-arrow-left"></i> : <i className="bi bi-arrow-right"></i>}
         </button>
         {showSidebar && (
           <aside className="w-64 bg-white border-r overflow-y-auto" style={{ backgroundColor: theme.sidebar }}>
