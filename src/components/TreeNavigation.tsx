@@ -82,21 +82,22 @@ export function TreeNavigation({
   // Render một mục (folder/file)
   const renderItem = (item: FolderType) => {
     if (!showDeleted && item.deleted) return null; // Không render nếu bị xóa và không yêu cầu hiển thị
-
+  
     const isEditing = editingPath === item.path;
-
+  
     return (
       <div
         key={item.path}
         className={`group flex items-center gap-1 px-2 py-1 relative transition-transform duration-200 hover:scale-105 hover:bg-gray-100`}
         onContextMenu={(e) => handleContextMenu(e, item.path, item.isFile, item.deleted, item.icon)}
       >
+        {/* Nút mở rộng/thu gọn cho thư mục */}
         {!item.isFile && (
           <button
             onClick={(e) => {
               e.stopPropagation();
-              onToggleFolder(item.path);
-              onFolderSelect(item.path);
+              onToggleFolder(item.path); // Mở rộng/thu gọn thư mục
+              onFolderSelect(item.path); // Đặt thư mục được chọn
             }}
             className="p-1 transition-transform duration-200 hover:scale-110"
           >
@@ -107,9 +108,11 @@ export function TreeNavigation({
             )}
           </button>
         )}
-    
+  
+        {/* Icon của mục */}
         <i className={`${item.icon || (item.isFile ? 'bi-file-earmark-text' : 'bi-folder')} mr-1 transition-transform duration-200 group-hover:scale-110`} />
-    
+  
+        {/* Tên mục */}
         {isEditing ? (
           <form
             onSubmit={(e) => {
@@ -132,7 +135,16 @@ export function TreeNavigation({
             className={`flex-1 text-sm cursor-pointer transition-colors duration-200 ${
               selectedPath === item.path ? 'font-semibold text-blue-600' : 'text-gray-800'
             }`}
-            onClick={() => item.isFile && onSelectItem(item.path)}
+            onClick={(e) => {
+              // Chỉ mở editor nếu là tài liệu
+              if (item.isFile) {
+                onSelectItem(item.path);
+              } else {
+                // Nếu là thư mục, chỉ mở rộng/thu gọn
+                onToggleFolder(item.path);
+                onFolderSelect(item.path);
+              }
+            }}
           >
             {item.name}
           </span>
@@ -140,6 +152,7 @@ export function TreeNavigation({
       </div>
     );
   };
+  
 
   // Render children (đệ quy)
   const renderChildren = () => {

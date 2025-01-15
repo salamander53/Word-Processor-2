@@ -2,10 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 // import { Folder, Plus } from 'lucide-react';
 import AxiosInstance from '../components/AxiosInstance';
+import { toast } from 'react-toastify';
 
 export function HomePage() {
   const navigate = useNavigate();
-  const [folders, setFolders] = useState([]); // Danh sách folder
+  const [folders, setFolders] = useState ([]); // Danh sách folder
   const [loading, setLoading] = useState(true);
 
   const owner = 'john_doe'; // Giả sử owner là john_doe
@@ -25,8 +26,9 @@ export function HomePage() {
       const extractedFolders = Object.values(foldersData);
       
       setFolders(extractedFolders);
-    } catch (error) {
-      console.error('Error loading folders:', error);
+    } catch (err) {
+      // console.error('Error loading folders:', error);
+      toast.error(`${err}`)
     } finally {
       setLoading(false);
     }

@@ -104,11 +104,11 @@ export function ProjectPage() {
   const handleSelectItem = (path: string) => {
     const item = findItemByPath(folders, path);
     if (item && item.isFile) {
-      setSelectedPath(path);
-      setCurrentContent(item.content || '');
+      setSelectedPath(path); // Chỉ đặt selectedPath khi chọn tài liệu
+      setCurrentContent(item.content || ''); // Tải nội dung tài liệu
     }
   };
-
+  
   const handleContentChange = (content: string) => {
     setCurrentContent(content);
     setHasUnsavedChanges(true);
@@ -143,7 +143,7 @@ export function ProjectPage() {
 
   const handleAddDocument = (parentPath: string) => {
     const newName = 'New Document';
-    const newPath = `${parentPath}/new_document.txt`;
+    const newPath = `${parentPath}/new_document`;
     
     const newDoc = {
       name: newName,
