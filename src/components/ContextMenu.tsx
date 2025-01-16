@@ -1,7 +1,6 @@
 import React from 'react';
-// import { File, FolderPlus, Pencil, Trash2, Image } from 'lucide-react';
+import 'bootstrap-icons/font/bootstrap-icons.css';
 import { IconPicker } from './IconPicker';
-import * as Popover from '@radix-ui/react-popover';
 
 interface ContextMenuProps {
   x: number;
@@ -32,6 +31,8 @@ export function ContextMenu({
   onChangeIcon,
   deleted,
 }: ContextMenuProps) {
+  const [showIconPicker, setShowIconPicker] = React.useState(false);
+
   React.useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
@@ -39,7 +40,6 @@ export function ContextMenu({
         onClose();
       }
     };
-
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
   }, [onClose]);
@@ -61,7 +61,6 @@ export function ContextMenu({
             onClick={onAddFolder}
             className="w-full px-4 py-2 text-left flex items-center gap-2 hover:bg-gray-100"
           >
-            {/* <FolderPlus className="w-4 h-4" /> */}
             <i className="bi bi-folder-plus w-4 h-4"></i>
             <span>New Folder</span>
           </button>
@@ -69,45 +68,46 @@ export function ContextMenu({
             onClick={onAddDocument}
             className="w-full px-4 py-2 text-left flex items-center gap-2 hover:bg-gray-100"
           >
-            {/* <File className="w-4 h-4" /> */}
             <i className="bi bi-file-earmark w-4 h-4"></i>
             <span>New Document</span>
           </button>
           <div className="border-t border-gray-200 my-1" />
         </>
       )}
-
       <button
         onClick={onRename}
         className="w-full px-4 py-2 text-left flex items-center gap-2 hover:bg-gray-100"
       >
-        {/* <Pencil className="w-4 h-4" /> */}
         <i className="bi bi-pencil w-4 h-4"></i>
         <span>Rename</span>
       </button>
-
-      <Popover.Root>
-        <Popover.Trigger asChild>
-          <button className="w-full px-4 py-2 text-left flex items-center gap-2 hover:bg-gray-100">
-            <i className="bi bi-image w-4 h-4"></i>
-            <span>Change Icon</span>
-          </button>
-        </Popover.Trigger>
-        <Popover.Portal>
-          <Popover.Content className="z-[60] icon-picker">
+      <div
+        onMouseEnter={() => setShowIconPicker(true)}
+        onClick={() => setShowIconPicker(!showIconPicker)}
+        className="relative w-full px-4 py-2 text-left flex items-center gap-2 hover:bg-gray-100"
+      >
+        <i className="bi bi-image w-4 h-4"></i>
+        <span>Change Icon</span>
+        {showIconPicker && (
+          <div
+            className="absolute left-full bg-white shadow-lg rounded-lg z-50"
+            style={{
+              marginLeft: '0.2rem',
+              borderTop: `${x}px`, // Điều chỉnh vị trí bảng cao hơn
+              height: '400px',
+            }}
+          >
             <IconPicker
               currentIcon={currentIcon}
               onSelect={(iconName) => {
-                onChangeIcon(iconName); // Truyền icon mới qua prop
-                onClose(); // Đóng menu sau khi chọn
+                onChangeIcon(iconName);
+                setShowIconPicker(false);
               }}
             />
-          </Popover.Content>
-        </Popover.Portal>
-      </Popover.Root>
-
+          </div>
+        )}
+      </div>
       <div className="border-t border-gray-200 my-1" />
-
       {deleted ? (
         <button
           onClick={onRestore}

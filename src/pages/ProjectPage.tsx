@@ -7,6 +7,7 @@ import { ThemeCustomizer } from '../components/ThemeCustomizer';
 import { FolderType, Theme } from '../types';
 import AxiosInstance from '../components/AxiosInstance';
 import { toast } from 'react-toastify';
+
 const owner = 'john_doe';
 export function ProjectPage() {
   const location = useLocation();
@@ -33,7 +34,7 @@ export function ProjectPage() {
       );
       setFolders(response.data);
     } catch (error) {
-      toast.error('Failed to load folders.');
+      // toast.error('Failed to load folders.');
     }
   };
 
@@ -118,7 +119,7 @@ export function ProjectPage() {
   const handleDelete = async (path: string) => {
     try {
       await AxiosInstance.post('folders/delete', { path });
-      toast.success('Deleted successfully.');
+      // toast.success('Deleted successfully.');
       loadFolders();
     } catch (error) {
       toast.error('Failed to delete.');
@@ -167,6 +168,27 @@ export function ProjectPage() {
     });
     console.log(iconName);
   };
+
+  const getDeletedItems = (folder: FolderType): FolderType[] => {
+    const deletedItems: FolderType[] = [];
+
+    const traverse = (node: FolderType) => {
+      if (node.deleted) {
+        deletedItems.push(node);
+      }
+
+      if (node.children) {
+        Object.values(node.children).forEach(traverse);
+      }
+    };
+
+    traverse(folder);
+    return deletedItems;
+  };
+  function getPathAsString(path: string): string {
+    const pathComponents = path.split('/').filter((component) => component);
+    return pathComponents.join(' > ');
+  }
   return (
     <div
       className="flex flex-col h-screen bg-gray-50"
@@ -181,7 +203,7 @@ export function ProjectPage() {
       />
       <div className="flex flex-1 overflow-hidden">
         <aside
-          className="w-64 bg-white border-r overflow-y-auto"
+          className=" bg-white border-r overflow-y-auto "
           style={{ backgroundColor: theme.sidebar }}
         >
           <ThemeCustomizer theme={theme} onChange={setTheme} />
@@ -211,7 +233,48 @@ export function ProjectPage() {
               theme={theme}
             />
           ) : showDeleted ? (
-            <div>Show deleted items</div>
+            <div className="p-4 ">
+              <h2 className="text-lg font-semibold mb-4">Trash</h2>
+              {folders ? (
+                <ul
+                  className="space-y-2 overflow-y-auto"
+                  style={{ maxHeight: '500px' }}
+                >
+                  {getDeletedItems(folders).map((item) => (
+                    <li
+                      key={item.path}
+                      className="flex items-center justify-between bg-gray-100 p-2 rounded-md hover:shadow"
+                    >
+                      <div className="flex items-center gap-4 p-2 rounded-lg bg-gray-100 hover:bg-gray-200">
+                        <i
+                          className={`${
+                            item.icon ||
+                            (item.isFile ? 'bi-file-earmark-text' : 'bi-folder')
+                          } text-gray-500`}
+                        />
+                        <div className="flex flex-col">
+                          <span className="font-semibold text-black">
+                            {item.name}
+                          </span>
+                          <span className="text-sm text-gray-600">
+                            {getPathAsString(item.path)}
+                          </span>
+                        </div>
+                      </div>
+
+                      <button
+                        className="text-green-600 hover:underline"
+                        onClick={() => handleRestore(item.path)}
+                      >
+                        Restore
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="text-gray-500">Trash is empty</div>
+              )}
+            </div>
           ) : (
             <div className="text-center mt-20">Select a document to edit</div>
           )}

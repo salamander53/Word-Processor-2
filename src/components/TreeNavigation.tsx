@@ -92,7 +92,7 @@ export function TreeNavigation({
     return (
       <div
         key={item.path}
-        className={`group flex items-center gap-1 px-2 py-1 relative transition-transform duration-200 hover:scale-105 hover:bg-gray-100`}
+        className={`group flex items-center gap-1 px-2 py-1 relative transition-transform duration-200 hover:scale-105 hover:bg-gray-100 max-w-44`}
         onContextMenu={(e) =>
           handleContextMenu(e, item.path, item.isFile, item.deleted, item.icon)
         }
@@ -121,7 +121,7 @@ export function TreeNavigation({
 
         {/* Icon của mục */}
         <i
-          className={`bi ${item.icon} mr-1 transition-transform duration-200 group-hover:scale-110`}
+          className={`bi ${item.icon} mr-0 transition-transform duration-200 group-hover:scale-110`}
         />
 
         {/* Tên mục */}
@@ -141,7 +141,7 @@ export function TreeNavigation({
           </form>
         ) : (
           <span
-            className={`flex-1 ${selectedPath === item.path ? 'font-semibold text-blue-600' : 'text-gray-800'}`}
+            className={`flex-1 text-sm ${selectedPath === item.path ? 'font-semibold text-blue-600' : 'text-gray-800'}`}
           >
             {item.name}
           </span>
