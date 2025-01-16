@@ -1,5 +1,4 @@
-import React from 'react';
-import 'bootstrap-icons/font/bootstrap-icons.css';
+import { useEffect, useState } from 'react';
 import { IconPicker } from './IconPicker';
 
 interface ContextMenuProps {
@@ -31,15 +30,16 @@ export function ContextMenu({
   onChangeIcon,
   deleted,
 }: ContextMenuProps) {
-  const [showIconPicker, setShowIconPicker] = React.useState(false);
+  const [showIconPicker, setShowIconPicker] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       if (!target.closest('.context-menu') && !target.closest('.icon-picker')) {
         onClose();
       }
     };
+
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
   }, [onClose]);
@@ -54,6 +54,7 @@ export function ContextMenu({
           y + 250 > window.innerHeight ? -100 : 0
         }%)`,
       }}
+      onMouseLeave={onClose} // Đóng menu khi chuột rời khỏi
     >
       {isFolder && (
         <>

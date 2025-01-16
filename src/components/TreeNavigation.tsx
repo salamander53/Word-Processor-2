@@ -53,6 +53,7 @@ export function TreeNavigation({
   const [showIconPicker, setShowIconPicker] = useState(false);
 
   // Mở context menu
+  // Mở context menu
   const handleContextMenu = (
     e: React.MouseEvent,
     path: string,
@@ -61,16 +62,23 @@ export function TreeNavigation({
     currentIcon?: string // Đặt tham số tùy chọn ở cuối
   ) => {
     e.preventDefault();
-    setContextMenu({
-      x: e.clientX,
-      y: e.clientY,
-      isVisible: true,
-      path,
-      isFile,
-      currentIcon,
-      deleted,
-    });
-    // setEditingPath(path);
+
+    // Nếu context menu hiện tại không phải là mục đang nhấp chuột phải, thì mở menu mới
+    if (!contextMenu || contextMenu.path !== path) {
+      setContextMenu({
+        x: e.clientX,
+        y: e.clientY,
+        isVisible: true,
+        path,
+        isFile,
+        currentIcon,
+        deleted,
+      });
+    } else {
+      // Nếu đang mở menu cho cùng một mục, đóng menu
+      setContextMenu(null);
+    }
+
     setTempName('');
   };
 
@@ -83,6 +91,7 @@ export function TreeNavigation({
     setEditingPath(null);
   };
 
+  const [currentClickContextMenu, setCurrentClickContextMenu] = useState<any>();
   // Render một mục (folder/file)
   const renderItem = (item: FolderType) => {
     if (!showDeleted && item.deleted) return null; // Không render nếu bị xóa và không yêu cầu hiển thị
@@ -92,7 +101,7 @@ export function TreeNavigation({
     return (
       <div
         key={item.path}
-        className={`group flex items-center gap-1 px-2 py-1 relative transition-transform duration-200 hover:scale-105 hover:bg-gray-100 max-w-44`}
+        className={`group flex items-center gap-1 px-2 py-1 relative transition-transform duration-200 hover:scale-105 hover:bg-gray-100`}
         onContextMenu={(e) =>
           handleContextMenu(e, item.path, item.isFile, item.deleted, item.icon)
         }

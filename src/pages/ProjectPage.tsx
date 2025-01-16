@@ -24,6 +24,8 @@ export function ProjectPage() {
     text: '#1f2937',
     sidebar: '#f3f4f6',
   });
+  const [sidebarWidth, setSidebarWidth] = useState(240);
+  const [isResizing, setIsResizing] = useState(false);
   useEffect(() => {
     loadFolders();
   }, [folders]);
@@ -128,7 +130,7 @@ export function ProjectPage() {
   const handleRestore = async (path: string) => {
     try {
       await AxiosInstance.post('folders/restore', { path });
-      toast.success('Restored successfully.');
+      // toast.success('Restored successfully.');
       loadFolders();
     } catch (error) {
       toast.error('Failed to restore.');
@@ -189,6 +191,29 @@ export function ProjectPage() {
     const pathComponents = path.split('/').filter((component) => component);
     return pathComponents.join(' > ');
   }
+  const startResizing = () => setIsResizing(true);
+  const stopResizing = () => setIsResizing(false);
+  const resizeSidebar = (e: React.MouseEvent) => {
+    if (isResizing) {
+      const newWidth = e.clientX - document.body.offsetLeft;
+      if (newWidth >= 200 && newWidth <= 500) {
+        setSidebarWidth(newWidth);
+      }
+    }
+  };
+  useEffect(() => {
+    if (isResizing) {
+      document.addEventListener('mousemove', resizeSidebar);
+      document.addEventListener('mouseup', stopResizing);
+    } else {
+      document.removeEventListener('mousemove', resizeSidebar);
+      document.removeEventListener('mouseup', stopResizing);
+    }
+    return () => {
+      document.removeEventListener('mousemove', resizeSidebar);
+      document.removeEventListener('mouseup', stopResizing);
+    };
+  }, [isResizing]);
   return (
     <div
       className="flex flex-col h-screen bg-gray-50"
@@ -201,10 +226,10 @@ export function ProjectPage() {
         onToggleTrash={() => setShowDeleted(!showDeleted)}
         showTrash={showDeleted}
       />
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden" onMouseMove={resizeSidebar}>
         <aside
-          className=" bg-white border-r overflow-y-auto "
-          style={{ backgroundColor: theme.sidebar }}
+          className=" bg-white border-r overflow-auto relative"
+          style={{ width: sidebarWidth, backgroundColor: theme.sidebar }}
         >
           <ThemeCustomizer theme={theme} onChange={setTheme} />
           {folders && (
@@ -222,6 +247,15 @@ export function ProjectPage() {
               onChangeIcon={handleChangeIcon}
             />
           )}
+          <div
+            onMouseDown={startResizing}
+            className="resizer position-absolute top-0 end-0 h-100"
+            style={{
+              width: '5px',
+              cursor: 'col-resize',
+              backgroundColor: '#f1f1f1',
+            }}
+          />
         </aside>
         <main className="flex-1 bg-white">
           {selectedPath && selectedPath !== false && !showDeleted ? (
