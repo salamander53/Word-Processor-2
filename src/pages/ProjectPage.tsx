@@ -7,21 +7,15 @@ import { ThemeCustomizer } from '../components/ThemeCustomizer';
 import { FolderType, Theme } from '../types';
 import AxiosInstance from '../components/AxiosInstance';
 import { toast } from 'react-toastify';
-
 const owner = 'john_doe';
-
 export function ProjectPage() {
   const location = useLocation();
   const { nameFolder } = location.state || {};
-
-  // State quản lý thư mục và giao diện
   const [folders, setFolders] = useState<FolderType | null>(null);
   const [selectedPath, setSelectedPath] = useState<string | boolean>(false);
-  const [currentContent, setCurrentContent] = useState<string>('');
+  const [currentFolder, setcurrentFolder] = useState<FolderType>();
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showDeleted, setShowDeleted] = useState(false);
-
-  // Chủ đề giao diện
   const [theme, setTheme] = useState<Theme>({
     primary: '#3b82f6',
     secondary: '#6b7280',
@@ -29,11 +23,9 @@ export function ProjectPage() {
     text: '#1f2937',
     sidebar: '#f3f4f6',
   });
-
   useEffect(() => {
     loadFolders();
-  }, []);
-
+  }, [folders]);
   const loadFolders = async () => {
     try {
       const response = await AxiosInstance.get(
@@ -45,29 +37,67 @@ export function ProjectPage() {
     }
   };
 
-  const handleSelectItem = (item: FolderType) => {
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     if (hasUnsavedChanges) {
+  //       handleSave();
+  //     }
+  //   }, 5000);
+  //   return () => clearInterval(interval);
+  // }, [currentFolder?.content, hasUnsavedChanges]);
+
+  // useEffect(() => {
+  //   const handleKeyDown = (e: KeyboardEvent) => {
+  //     if (e.ctrlKey && e.key === 's') {
+  //       e.preventDefault();
+  //       handleSave();
+  //     }
+  //   };
+  //   window.addEventListener('keydown', handleKeyDown);
+  //   return () => {
+  //     window.removeEventListener('keydown', handleKeyDown);
+  //   };
+  // }, [selectedPath, currentFolder?.content, hasUnsavedChanges]);
+
+  const handleSelectItem = async (item: FolderType) => {
+    if (hasUnsavedChanges) {
+      // const confirmSave = window.confirm('Bạn có muốn lưu thay đổi không?');
+      // if (confirmSave) {
+      //   await handleSave();
+      // }
+      await handleSave();
+    }
     if (item.isFile) {
       setSelectedPath(item.path);
-      setCurrentContent(item.content || '');
+      setcurrentFolder(item);
+      localStorage.getItem(item.path)
+        ? ''
+        : localStorage.setItem(item.path as string, item.content);
     } else {
       setSelectedPath(false);
     }
+    setHasUnsavedChanges(false);
   };
-
-  const handleContentChange = (content: string) => {
-    setCurrentContent(content);
-    setHasUnsavedChanges(true);
+  const handleFolderChange = (content: string) => {
+    if (currentFolder?.content !== content) {
+      setcurrentFolder({ ...currentFolder, content });
+      setHasUnsavedChanges(true);
+      localStorage.setItem(
+        currentFolder?.path as string,
+        currentFolder.content
+      );
+    }
   };
-
   const handleSave = async () => {
     if (!selectedPath) return;
     try {
-      await AxiosInstance.post('folders/save', {
-        path: selectedPath,
-        content: currentContent,
+      await AxiosInstance.post(`folders/update`, {
+        path: currentFolder?.path,
+        newContent: currentFolder?.content || '',
       });
       setHasUnsavedChanges(false);
-      toast.success('Document saved.');
+      localStorage.removeItem(currentFolder?.path as string);
+      // toast.success('Document saved.');
     } catch (error) {
       toast.error('Failed to save document.');
     }
@@ -86,7 +116,6 @@ export function ProjectPage() {
       toast.error('Rename failed.');
     }
   };
-
   const handleDelete = async (path: string) => {
     try {
       await AxiosInstance.post('folders/delete', { path });
@@ -96,7 +125,6 @@ export function ProjectPage() {
       toast.error('Failed to delete.');
     }
   };
-
   const handleRestore = async (path: string) => {
     try {
       await AxiosInstance.post('folders/restore', { path });
@@ -106,7 +134,6 @@ export function ProjectPage() {
       toast.error('Failed to restore.');
     }
   };
-
   const handleAddFolder = async (parentPath: string) => {
     try {
       await AxiosInstance.post('folders/create', {
@@ -120,7 +147,6 @@ export function ProjectPage() {
       toast.error('Failed to create folder.');
     }
   };
-
   const handleAddDocument = async (parentPath: string) => {
     try {
       await AxiosInstance.post('folders/create', {
@@ -134,25 +160,27 @@ export function ProjectPage() {
       toast.error('Failed to create document.');
     }
   };
-
   return (
     <div
       className="flex flex-col h-screen bg-gray-50"
       style={{ backgroundColor: theme.background }}
     >
+      {' '}
       <Header
         onNewFolder={() => handleAddFolder(selectedPath || `/${owner}`)}
         onNewDocument={() => handleAddDocument(selectedPath || `/${owner}`)}
         selectedPath={selectedPath}
         onToggleTrash={() => setShowDeleted(!showDeleted)}
         showTrash={showDeleted}
-      />
+      />{' '}
       <div className="flex flex-1 overflow-hidden">
+        {' '}
         <aside
           className="w-64 bg-white border-r overflow-y-auto"
           style={{ backgroundColor: theme.sidebar }}
         >
-          <ThemeCustomizer theme={theme} onChange={setTheme} />
+          {' '}
+          <ThemeCustomizer theme={theme} onChange={setTheme} />{' '}
           {folders && (
             <TreeNavigation
               folder={folders}
@@ -166,13 +194,14 @@ export function ProjectPage() {
               onAddDocument={handleAddDocument}
               showDeleted={showDeleted}
             />
-          )}
-        </aside>
+          )}{' '}
+        </aside>{' '}
         <main className="flex-1 bg-white">
+          {' '}
           {selectedPath && selectedPath !== false && !showDeleted ? (
             <Editor
-              content={currentContent}
-              onChange={handleContentChange}
+              currentFolder={currentFolder}
+              onChange={handleFolderChange}
               onSave={handleSave}
               hasUnsavedChanges={hasUnsavedChanges}
               theme={theme}
@@ -181,9 +210,9 @@ export function ProjectPage() {
             <div>Show deleted items</div>
           ) : (
             <div className="text-center mt-20">Select a document to edit</div>
-          )}
-        </main>
-      </div>
+          )}{' '}
+        </main>{' '}
+      </div>{' '}
     </div>
   );
 }
