@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ContextMenu } from './ContextMenu';
 import { FolderType } from '../types';
+import { IconPicker } from './IconPicker';
 
 interface TreeNavigationProps {
   folder: FolderType;
@@ -49,6 +50,7 @@ export function TreeNavigation({
   const [editingName, setEditingName] = useState('');
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
   const [tempName, setTempName] = useState<string>('');
+  const [showIconPicker, setShowIconPicker] = useState(false);
 
   // Mở context menu
   const handleContextMenu = (
@@ -119,7 +121,7 @@ export function TreeNavigation({
 
         {/* Icon của mục */}
         <i
-          className={`bi ${item.icon || (item.isFile ? 'bi-file-earmark-text' : 'bi-folder')} mr-1 transition-transform duration-200 group-hover:scale-110`}
+          className={`bi ${item.icon} mr-1 transition-transform duration-200 group-hover:scale-110`}
         />
 
         {/* Tên mục */}
@@ -175,6 +177,15 @@ export function TreeNavigation({
   return (
     <div className="select-none">
       {renderItem(folder)}
+      {/* {showIconPicker && (
+        <IconPicker
+          currentIcon={folder.icon}
+          onSelect={(iconName) => {
+            onChangeIcon(folder.path, iconName); // Gọi API thay đổi icon
+            setShowIconPicker(false); // Đóng picker
+          }}
+        />
+      )} */}
       <div className="ml-4">{renderChildren()}</div>
 
       {contextMenu && (
@@ -205,8 +216,9 @@ export function TreeNavigation({
             setEditingName(folder.name);
             setContextMenu(null);
           }}
-          onChangeIcon={(icon) => {
-            onChangeIcon(contextMenu.path, icon);
+          onChangeIcon={(iconName) => {
+            const selectedPath = contextMenu.path;
+            onChangeIcon(selectedPath, iconName); // Gọi `onChangeIcon`
             setContextMenu(null);
           }}
         />

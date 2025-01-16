@@ -37,14 +37,14 @@ export function ProjectPage() {
     }
   };
 
-  // useEffect(() => {
-  //   const interval = setInterval(() => {
-  //     if (hasUnsavedChanges) {
-  //       handleSave();
-  //     }
-  //   }, 5000);
-  //   return () => clearInterval(interval);
-  // }, [currentFolder?.content, hasUnsavedChanges]);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (hasUnsavedChanges) {
+        handleSave();
+      }
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [currentFolder?.content, hasUnsavedChanges]);
 
   // useEffect(() => {
   //   const handleKeyDown = (e: KeyboardEvent) => {
@@ -84,7 +84,7 @@ export function ProjectPage() {
       setHasUnsavedChanges(true);
       localStorage.setItem(
         currentFolder?.path as string,
-        currentFolder.content
+        currentFolder?.content
       );
     }
   };
@@ -102,7 +102,6 @@ export function ProjectPage() {
       toast.error('Failed to save document.');
     }
   };
-
   const handleRename = async (path: string, newName: string) => {
     if (!newName.trim()) {
       toast.error('Name cannot be empty.');
@@ -141,7 +140,7 @@ export function ProjectPage() {
         path: `${parentPath}/new_folder`,
         isFile: false,
       });
-      toast.success('Folder created.');
+      // toast.success('Folder created.');
       loadFolders();
     } catch (error) {
       toast.error('Failed to create folder.');
@@ -154,33 +153,38 @@ export function ProjectPage() {
         path: `${parentPath}/new_document.txt`,
         isFile: true,
       });
-      toast.success('Document created.');
+      // toast.success('Document created.');
       loadFolders();
     } catch (error) {
       toast.error('Failed to create document.');
     }
+  };
+
+  const handleChangeIcon = async (path: string, iconName: string) => {
+    AxiosInstance.post(`folders/update`, {
+      path: path,
+      newIcon: iconName,
+    });
+    console.log(iconName);
   };
   return (
     <div
       className="flex flex-col h-screen bg-gray-50"
       style={{ backgroundColor: theme.background }}
     >
-      {' '}
       <Header
         onNewFolder={() => handleAddFolder(selectedPath || `/${owner}`)}
         onNewDocument={() => handleAddDocument(selectedPath || `/${owner}`)}
         selectedPath={selectedPath}
         onToggleTrash={() => setShowDeleted(!showDeleted)}
         showTrash={showDeleted}
-      />{' '}
+      />
       <div className="flex flex-1 overflow-hidden">
-        {' '}
         <aside
           className="w-64 bg-white border-r overflow-y-auto"
           style={{ backgroundColor: theme.sidebar }}
         >
-          {' '}
-          <ThemeCustomizer theme={theme} onChange={setTheme} />{' '}
+          <ThemeCustomizer theme={theme} onChange={setTheme} />
           {folders && (
             <TreeNavigation
               folder={folders}
@@ -193,11 +197,11 @@ export function ProjectPage() {
               onAddFolder={handleAddFolder}
               onAddDocument={handleAddDocument}
               showDeleted={showDeleted}
+              onChangeIcon={handleChangeIcon}
             />
-          )}{' '}
-        </aside>{' '}
+          )}
+        </aside>
         <main className="flex-1 bg-white">
-          {' '}
           {selectedPath && selectedPath !== false && !showDeleted ? (
             <Editor
               currentFolder={currentFolder}
@@ -210,9 +214,9 @@ export function ProjectPage() {
             <div>Show deleted items</div>
           ) : (
             <div className="text-center mt-20">Select a document to edit</div>
-          )}{' '}
-        </main>{' '}
-      </div>{' '}
+          )}
+        </main>
+      </div>
     </div>
   );
 }
