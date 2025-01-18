@@ -54,7 +54,7 @@ export function ContextMenu({
           y + 250 > window.innerHeight ? -100 : 0
         }%)`,
       }}
-      onMouseLeave={onClose} // Đóng menu khi chuột rời khỏi
+      // onMouseLeave={onClose} // Đóng menu khi chuột rời khỏi
     >
       {isFolder && (
         <>
@@ -84,7 +84,8 @@ export function ContextMenu({
       </button>
       <div
         onMouseEnter={() => setShowIconPicker(true)}
-        onClick={() => setShowIconPicker(!showIconPicker)}
+        onMouseLeave={() => setShowIconPicker(false)}
+        // onClick={() => setShowIconPicker(!showIconPicker)}
         className="relative w-full px-4 py-2 text-left flex items-center gap-2 hover:bg-gray-100"
       >
         <i className="bi bi-image w-4 h-4"></i>

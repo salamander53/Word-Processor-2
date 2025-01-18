@@ -120,11 +120,11 @@ export function ProjectPage() {
   };
   const handleDelete = async (path: string) => {
     try {
-      await AxiosInstance.post('folders/delete', { path });
+      await AxiosInstance.post('folders/remove', { path });
       // toast.success('Deleted successfully.');
       loadFolders();
     } catch (error) {
-      toast.error('Failed to delete.');
+      toast.error('Failed to remove.');
     }
   };
   const handleRestore = async (path: string) => {
@@ -162,7 +162,6 @@ export function ProjectPage() {
       toast.error('Failed to create document.');
     }
   };
-
   const handleChangeIcon = async (path: string, iconName: string) => {
     AxiosInstance.post(`folders/update`, {
       path: path,
@@ -170,7 +169,6 @@ export function ProjectPage() {
     });
     console.log(iconName);
   };
-
   const getDeletedItems = (folder: FolderType): FolderType[] => {
     const deletedItems: FolderType[] = [];
 
@@ -222,7 +220,7 @@ export function ProjectPage() {
       <Header
         onNewFolder={() => handleAddFolder(selectedPath || `/${owner}`)}
         onNewDocument={() => handleAddDocument(selectedPath || `/${owner}`)}
-        selectedPath={selectedPath}
+        currentFolder={currentFolder}
         onToggleTrash={() => setShowDeleted(!showDeleted)}
         showTrash={showDeleted}
       />

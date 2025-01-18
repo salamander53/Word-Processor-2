@@ -50,7 +50,6 @@ export function TreeNavigation({
   const [editingName, setEditingName] = useState('');
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
   const [tempName, setTempName] = useState<string>('');
-  const [showIconPicker, setShowIconPicker] = useState(false);
 
   // Mở context menu
   // Mở context menu
@@ -62,23 +61,16 @@ export function TreeNavigation({
     currentIcon?: string // Đặt tham số tùy chọn ở cuối
   ) => {
     e.preventDefault();
-
-    // Nếu context menu hiện tại không phải là mục đang nhấp chuột phải, thì mở menu mới
-    if (!contextMenu || contextMenu.path !== path) {
-      setContextMenu({
-        x: e.clientX,
-        y: e.clientY,
-        isVisible: true,
-        path,
-        isFile,
-        currentIcon,
-        deleted,
-      });
-    } else {
-      // Nếu đang mở menu cho cùng một mục, đóng menu
-      setContextMenu(null);
-    }
-
+    setContextMenu(null);
+    setContextMenu({
+      x: e.clientX,
+      y: e.clientY,
+      isVisible: true,
+      path,
+      isFile,
+      currentIcon,
+      deleted,
+    });
     setTempName('');
   };
 
@@ -90,8 +82,6 @@ export function TreeNavigation({
     }
     setEditingPath(null);
   };
-
-  const [currentClickContextMenu, setCurrentClickContextMenu] = useState<any>();
   // Render một mục (folder/file)
   const renderItem = (item: FolderType) => {
     if (!showDeleted && item.deleted) return null; // Không render nếu bị xóa và không yêu cầu hiển thị

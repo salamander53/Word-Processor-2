@@ -7,6 +7,8 @@ import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap/dist/js/bootstrap.bundle.js';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import 'bootstrap-icons/font/bootstrap-icons.css';
+import 'react-grid-layout/css/styles.css';
+import 'react-resizable/css/styles.css';
 const router = createBrowserRouter([
   {
     path: '/',
