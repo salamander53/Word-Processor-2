@@ -2,23 +2,67 @@ import React, { useState } from 'react';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 
 const ICONS = {
-  Book: ['bi-book', 'bi-journal', 'bi-journal-richtext', 'bi-book-half'],
-  Notes: ['bi-pencil', 'bi-file-earmark-text', 'bi-clipboard', 'bi-file-text'],
-  'To Do': ['bi-check2-square', 'bi-card-checklist', 'bi-list-check'],
-  Flag: ['bi-flag', 'bi-flag-fill'],
-  Locations: ['bi-geo-alt', 'bi-geo-alt-fill', 'bi-map', 'bi-pin-map'],
-  Characters: ['bi-person', 'bi-people', 'bi-person-circle', 'bi-emoji-smile'],
-  'Way-Station': ['bi-flag', 'bi-flag-fill', 'bi-geo', 'bi-geo-alt'],
-  TV: ['bi-tv', 'bi-tv-fill', 'bi-display'],
-  'Back Matter': ['bi-layers', 'bi-box', 'bi-archive'],
-  Statistics: ['bi-graph-up', 'bi-graph-down', 'bi-bar-chart'],
-  'Light Bulb': ['bi-lightbulb', 'bi-lightbulb-fill'],
-  'Magnifying Glass': ['bi-search', 'bi-zoom-in', 'bi-zoom-out'],
-  'Question Mark': ['bi-question', 'bi-question-circle'],
+  Book: [
+    'bi-book text-primary',
+    'bi-journal text-success',
+    'bi-journal-richtext text-danger',
+    'bi-book-half text-warning',
+  ],
+  Notes: [
+    'bi-pencil text-info',
+    'bi-file-earmark-text text-muted',
+    'bi-clipboard text-dark',
+    'bi-file-text text-secondary',
+  ],
+  'To Do': [
+    'bi-check2-square text-success',
+    'bi-card-checklist text-primary',
+    'bi-list-check text-warning',
+  ],
+  Flag: ['bi-flag text-danger', 'bi-flag-fill text-warning'],
+  Locations: [
+    'bi-geo-alt text-primary',
+    'bi-geo-alt-fill text-success',
+    'bi-map text-info',
+    'bi-pin-map text-danger',
+  ],
+  Characters: [
+    'bi-person text-dark',
+    'bi-people text-secondary',
+    'bi-person-circle text-warning',
+    'bi-emoji-smile text-success',
+  ],
+  'Way-Station': [
+    'bi-flag text-danger',
+    'bi-flag-fill text-primary',
+    'bi-geo text-success',
+    'bi-geo-alt text-info',
+  ],
+  TV: ['bi-tv text-primary', 'bi-tv-fill text-warning', 'bi-display text-dark'],
+  'Back Matter': [
+    'bi-layers text-info',
+    'bi-box text-success',
+    'bi-archive text-warning',
+  ],
+  Statistics: [
+    'bi-graph-up text-primary',
+    'bi-graph-down text-danger',
+    'bi-bar-chart text-success',
+  ],
+  'Light Bulb': ['bi-lightbulb text-warning', 'bi-lightbulb-fill text-success'],
+  'Magnifying Glass': [
+    'bi-search text-primary',
+    'bi-zoom-in text-success',
+    'bi-zoom-out text-danger',
+  ],
+  'Question Mark': [
+    'bi-question text-warning',
+    'bi-question-circle text-primary',
+  ],
   Warning: [
-    'bi-exclamation-triangle',
-    'bi-exclamation-circle',
-    'bi-exclamation',
+    'bi-exclamation-triangle text-danger',
+    'bi-exclamation-circle text-warning',
+    'bi-exclamation text-primary',
   ],
 };
 

@@ -68,14 +68,37 @@ export function Editor({
             'bold italic forecolor | alignleft aligncenter ' +
             'alignright alignjustify | bullist numlist outdent indent | ' +
             'removeformat | help',
+          // content_style: `
+          //   body {
+          //     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+          //     font-size: 16px;
+          //     color: ${theme.text};
+          //     background-color: ${theme.background};
+          //   }
+          // `,
           content_style: `
-            body { 
-              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-              font-size: 16px;
-              color: ${theme.text};
-              background-color: ${theme.background};
-            }
-          `,
+                body {
+                    background: #fff;
+                }
+
+                @media (min-width: 840px) {
+                    html {
+                        background: #eceef4;
+                        min-height: 100%;
+                        padding: 0 .5rem
+                    }
+
+                    body {
+                        background-color: #fff;
+                        box-shadow: 0 0 4px rgba(0, 0, 0, .15);
+                        box-sizing: border-box;
+                        margin: 1rem auto 0;
+                        max-width: 820px;
+                        min-height: calc(100vh - 1rem);
+                        padding:4rem 6rem 6rem 6rem
+                    }
+                }
+            `,
         }}
         value={currentFolder?.content}
         onEditorChange={onChange}

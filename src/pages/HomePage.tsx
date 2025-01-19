@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import AxiosInstance from '../components/AxiosInstance';
 import { toast } from 'react-toastify';
 import { Sidebar } from '../components/Sidebar';
+import GridLayout from 'react-grid-layout';
 
 export function HomePage() {
   const navigate = useNavigate();
@@ -11,9 +12,9 @@ export function HomePage() {
   const [loading, setLoading] = useState(true);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
   const [sections, setSections] = useState([
-    { id: 'projects', title: 'My Projects', x: 0, y: 0, w: 6, h: 3 },
-    { id: 'updates', title: 'Recent Updates', x: 6, y: 0, w: 6, h: 2 },
-    { id: 'featured', title: 'Featured Projects', x: 0, y: 3, w: 12, h: 2 },
+    { id: 'projects', title: 'My Folder', x: 0, y: 3, w: 8, h: 7 },
+    { id: 'updates', title: 'Recent Updates', x: 8, y: 3, w: 4, h: 7 },
+    { id: 'featured', title: 'Featured Projects', x: 0, y: 0, w: 12, h: 6 },
   ]);
 
   const sidebarWidth = sidebarCollapsed ? 64 : 200;
@@ -72,27 +73,6 @@ export function HomePage() {
     );
   }
 
-  const handleSectionReorder = (draggedId: string, targetId: string) => {
-    setSections((prev) => {
-      const newSections = [...prev];
-      const draggedIndex = newSections.findIndex((s) => s.id === draggedId);
-      const targetIndex = newSections.findIndex((s) => s.id === targetId);
-      const [draggedSection] = newSections.splice(draggedIndex, 1);
-      newSections.splice(targetIndex, 0, draggedSection);
-      return newSections.map((s, i) => ({ ...s, order: i }));
-    });
-  };
-
-  const handleSectionResize = (id: string, newHeight: number) => {
-    setSections((prev) =>
-      prev.map((section) =>
-        section.id === id
-          ? { ...section, height: Math.max(100, newHeight) }
-          : section
-      )
-    );
-  };
-
   const renderSection = (section: Section) => {
     switch (section.id) {
       case 'projects':
@@ -112,13 +92,49 @@ export function HomePage() {
                   }
                   className="w-44 h-60 bg-white rounded-lg border border-gray-200 hover:border-gray-300 transition-all hover:shadow-md p-4 cursor-pointer flex flex-col"
                 >
-                  <div className="flex items-center justify-between mb-2">
-                    <i className="bi bi-file w-6 h-6 text-blue-500" />
+                  {/* <div className="flex items-center justify-between mb-2">
+                    <i
+                      className={`bi ${folder.icon} mr-0 transition-transform duration-200 group-hover:scale-110 text-xs`}
+                    />
+
                     <span className="text-xs text-gray-500">
                       {new Date(folder.updatedAt).toLocaleDateString()}
                     </span>
                   </div>
-                  <h3 className="font-medium truncate">{folder.name}</h3>
+                  <h3 className="font-medium truncate">{folder.name}</h3> */}
+                  {/* Card Header */}
+                  <div className="flex justify-start">
+                    <i className={`bi ${folder.icon}`} />
+                    <h3 className="ms-2 font-medium text-sm mb-2 truncate">
+                      {folder.name}
+                    </h3>
+                    {/* <ChevronRight className="w-4 h-4 text-gray-400" /> */}
+                  </div>
+
+                  {/* Card Content */}
+                  <div>
+                    {folder.isFile && folder.content && (
+                      <p className="text-gray-500 font-thin text-sm">
+                        {folder.content.substring(0, 300)}...
+                      </p>
+                    )}
+                    {!folder.isFile && (
+                      <div className="text-gray-500">
+                        <span>
+                          {Object.keys(folder.children || {}).length} items
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Card Footer */}
+                  <div className="mt-2 text-gray-500 text-xs">
+                    <div className="flex items-center justify-between">
+                      <span>{folder.isFile ? 'Document' : 'Folder'}</span>
+                      <span>•</span>
+                      <span>Modified 2h ago</span>
+                    </div>
+                  </div>
                 </div>
               ))}
               <button
@@ -126,7 +142,7 @@ export function HomePage() {
                 className="w-44 h-60 bg-white rounded-lg border-2 border-dashed border-gray-300 hover:border-gray-400 transition-colors flex flex-col items-center justify-center gap-2 p-4"
               >
                 <i className="bi bi-folder-plus w-6 h-6 text-gray-400" />
-                <span className="text-sm text-gray-600">New Project</span>
+                <span className="text-sm text-gray-600">New Folder</span>
               </button>
             </div>
           </div>
@@ -239,13 +255,13 @@ export function HomePage() {
         className="flex-1 ml-[64px]"
         style={{ marginLeft: sidebarCollapsed ? '64px' : `${sidebarWidth}px` }}
       >
-        <header className="bg-white border-b px-6 py-4">
+        {/* <header className=" px-6 py-3">
           <div className="max-w-6xl mx-auto">
-            <h1 className="text-2xl font-semibold">My Documents</h1>
+            <h1 className="text-2xl font-semibold">Hello</h1>
           </div>
-        </header>
+        </header> */}
 
-        <main className="max-w-6xl mx-auto py-8 px-4 space-y-6">
+        {/* <main className="max-w-6xl mx-auto py-8 px-4 space-y-6">
           {sections
             .sort((a, b) => a.order - b.order)
             .map((section) => (
@@ -295,7 +311,7 @@ export function HomePage() {
                     />
                     {section.title}
                   </h2>
-                  {/* <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2">
                     <div
                       className="w-4 h-4 cursor-ns-resize"
                       onMouseDown={(e) => {
@@ -324,7 +340,7 @@ export function HomePage() {
                     >
                       <i class="bi bi-arrows-vertical"></i>
                     </div>
-                  </div> */}
+                  </div>
                 </div>
                 <div
                   className="p-4 overflow-auto"
@@ -334,7 +350,47 @@ export function HomePage() {
                 </div>
               </section>
             ))}
-        </main>
+        </main> */}
+        <GridLayout
+          className="layout"
+          layout={sections.map((section) => ({
+            i: section.id,
+            x: section.x,
+            y: section.y,
+            w: section.w,
+            h: section.h,
+          }))}
+          cols={12}
+          rowHeight={50}
+          width={1200}
+          onLayoutChange={handleLayoutChange}
+          isResizable
+          isDraggable
+          draggableHandle=".drag-handle"
+        >
+          {sections
+            .sort((a, b) => a.order - b.order)
+            .map((section) => (
+              <section
+                key={section.id}
+                data-id={section.id}
+                className="bg-white rounded-lg shadow-sm "
+              >
+                <div className="p-4 border-b flex items-center justify-between">
+                  <h2 className="text-md font-semibold flex items-center gap-2">
+                    <i className="bi bi-grip-vertical w-4 h-4 cursor-move text-gray-400 drag-handle" />
+                    {section.title}
+                  </h2>
+                </div>
+                <div
+                  className="p-4 overflow-auto"
+                  // style={{ height: 'calc(100% - 60px)', overflowY: 'auto' }}
+                >
+                  {renderSection(section)}
+                </div>
+              </section>
+            ))}
+        </GridLayout>
       </div>
     </div>
   );

@@ -45,7 +45,7 @@ export function TreeNavigation({
   showDeleted = false,
 }: TreeNavigationProps) {
   //   const isExpanded = expandedFolders.has(folder?.path);
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
   const [editingPath, setEditingPath] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
@@ -91,13 +91,13 @@ export function TreeNavigation({
     return (
       <div
         key={item.path}
-        className={`group flex items-center gap-1 px-2 py-1 relative transition-transform duration-200 hover:scale-105 hover:bg-gray-100`}
+        className={`${selectedPath === item.path ? 'font-semibold border-1 border-blue-700 bg-blue-200' : 'text-gray-800'} group flex items-center gap-0.5 px-1 py-0.5 relative transition-transform duration-200 hover:scale-105 ${selectedPath === item.path ? '' : 'hover:bg-gray-100'}`}
         onContextMenu={(e) =>
           handleContextMenu(e, item.path, item.isFile, item.deleted, item.icon)
         }
         onClick={() => {
           if (!item.isFile) {
-            setIsExpanded(!isExpanded);
+            // setIsExpanded(!isExpanded);
             onToggleFolder(item.path);
           }
           onSelectItem(item);
@@ -110,17 +110,17 @@ export function TreeNavigation({
               e.stopPropagation();
               setIsExpanded(!isExpanded);
             }}
-            className="p-1 transition-transform duration-200 hover:scale-110"
+            className="p-0.5 transition-transform duration-200 hover:scale-110"
           >
             <i
-              className={`bi ${isExpanded ? 'bi-chevron-down' : 'bi-chevron-right'}`}
+              className={`bi ${isExpanded ? 'bi-chevron-down' : 'bi-chevron-right'} text-xs`}
             />
           </button>
         )}
 
         {/* Icon của mục */}
         <i
-          className={`bi ${item.icon} mr-0 transition-transform duration-200 group-hover:scale-110`}
+          className={`bi ${item.icon} mr-0 transition-transform duration-200 group-hover:scale-110 text-xs`}
         />
 
         {/* Tên mục */}
@@ -135,13 +135,11 @@ export function TreeNavigation({
               onChange={(e) => setTempName(e.target.value)}
               placeholder={editingName}
               autoFocus
-              className="w-full px-1 py-0.5 text-sm border rounded transition-all duration-200 focus:ring focus:ring-blue-300"
+              className="w-full px-1 py-0.5 text-xs border rounded transition-all duration-200 focus:ring focus:ring-blue-300"
             />
           </form>
         ) : (
-          <span
-            className={`flex-1 text-sm ${selectedPath === item.path ? 'font-semibold text-blue-600' : 'text-gray-800'}`}
-          >
+          <span className={`flex-1 text-xs px-1 py-0.5 rounded `}>
             {item.name}
           </span>
         )}
