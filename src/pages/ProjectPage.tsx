@@ -89,6 +89,7 @@ export function ProjectPage() {
     } else {
       setSelectedPath(item.path);
       setShowCoarkBoard(true);
+      setcurrentFolder(item);
     }
     setHasUnsavedChanges(false);
   };
@@ -279,10 +280,15 @@ export function ProjectPage() {
         onToggleTrash={() => setShowDeleted(!showDeleted)}
         showTrash={showDeleted}
         toggleNotebar={() => setIsNoteBarOpen((prev) => !prev)}
+        showCoarkBoard={showCoarkBoard}
+        onSelectItem={handleSelectItem}
+        selectedPath={selectedPath}
+        folders={folders}
+        findItemByPath={findItemByPath}
       />
       <div className="flex flex-1 overflow-hidden" onMouseMove={resizeSidebar}>
         <aside
-          className=" bg-white border-r overflow-auto relative"
+          className=" bg-gray-50 border-r overflow-auto relative"
           style={{ width: sidebarWidth, backgroundColor: theme.sidebar }}
         >
           {/* <ThemeCustomizer theme={theme} onChange={setTheme} /> */}
@@ -383,7 +389,7 @@ export function ProjectPage() {
           )}
         </main>
 
-        <Notebar isOpen={isNoteBarOpen} />
+        <Notebar isOpen={isNoteBarOpen} currentFolder={currentFolder} />
       </div>
     </div>
   );

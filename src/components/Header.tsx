@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { FolderType } from '../types';
 
 interface HeaderProps {
   onNewFolder: () => void;
@@ -8,6 +9,11 @@ interface HeaderProps {
   onToggleTrash: () => void;
   showTrash: boolean;
   toggleNotebar: () => void;
+  showCoarkBoard: boolean;
+  onSelectItem: (item: FolderType) => void;
+  selectedPath: string | null;
+  folders: FolderType;
+  findItemByPath: (root: FolderType, path: string) => FolderType;
 }
 
 export function Header({
@@ -17,7 +23,13 @@ export function Header({
   onToggleTrash,
   showTrash,
   toggleNotebar,
+  showCoarkBoard,
+  onSelectItem,
+  selectedPath,
+  folders,
+  findItemByPath,
 }: HeaderProps) {
+  const [viewSearchBar, setViewSearchBar] = useState<string>('normal');
   const getPathAsString = (path: string): string => {
     if (!path) return '';
     const pathComponents = path.split('/').filter((component) => component);
@@ -73,7 +85,7 @@ export function Header({
     //   </div>
     // </header>
 
-    <div className="bg-white border-b">
+    <div className="bg-gray-100 items-center border-b">
       {/* Main Toolbar */}
       <div className="flex items-center px-2 h-10 gap-2 border-b">
         {/* 1st Section */}
@@ -82,7 +94,7 @@ export function Header({
             <ChevronLeft className="w-4 h-4 text-gray-600" />
           </RouterLink> */}
           <button
-            className="p-1.5 hover:bg-gray-100 rounded"
+            className="p-1.5 hover:bg-gray-100 "
             onClick={() => navigate(-1)}
           >
             <i className="bi bi-arrow-left w-4 h-4"></i>
@@ -118,51 +130,78 @@ export function Header({
               }}
             />
           </button>
-          <div className="flex items-center gap-1 px-1 border-l">
+          <div className="flex items-center gap-1 px-1 ">
             <button
               onClick={onToggleTrash}
-              className={`p-1.5 rounded ${showTrash ? 'bg-gray-400' : 'hover:bg-gray-100'}`}
+              className={`p-1.5  ${showTrash ? 'bg-gray-300' : 'hover:bg-gray-100'}`}
             >
               <i className="bi bi-trash w-4 h-4 text-red-600" />
             </button>
           </div>
-          <div className="flex items-center gap-1 px-2  border-r">
-            <button className={`p-1.5 rounded hover:bg-gray-100`}>
+          <div className="flex items-center gap-1 px-2  ">
+            <button className={`p-1.5  hover:bg-gray-100`}>
               <i className="bi bi-pencil-square w-4 h-4" />
             </button>
           </div>
         </div>
 
         {/* 2nd Section */}
-        <div className="flex-1 flex items-center justify-center">
-          <div className="w-64 px-3 py-1 bg-gray-100 flex items-center gap-2">
-            <i className="bi bi-search text-gray-400" />
-            <span className="text-sm text-gray-400">Quick Search</span>
+        <div className="flex-1 flex items-center justify-center ml-52">
+          <div
+            className="w-100 px-3 py-1 bg-white border flex justify-center gap-2"
+            onClick={() => setViewSearchBar('search')}
+            onPointerLeave={() => setViewSearchBar('normal')}
+          >
+            {viewSearchBar === 'normal' ? (
+              <span className="text-sm ">{currentFolder?.name}</span>
+            ) : viewSearchBar === 'search' ? (
+              <>
+                <i className="bi bi-search" />
+                <input
+                  type="search"
+                  className="w-100 px-3 py-1 bg-white gap-2 text-sm "
+                ></input>
+              </>
+            ) : (
+              ''
+            )}
           </div>
         </div>
 
         {/* 3rd Section */}
         <div className="flex-1 flex items-center justify-center">
-          <button className="p-1.5 hover:bg-gray-100 rounded">
+          <button
+            className={`p-1.5 ${showCoarkBoard ? 'bg-gray-300' : 'hover:bg-gray-100'} `}
+            onClick={
+              showCoarkBoard
+                ? undefined
+                : () =>
+                    onSelectItem(
+                      findItemByPath(folders, currentFolder?.parentPath)
+                    )
+            }
+            disabled={showCoarkBoard}
+          >
             <i className="bi bi-grid-3x3 w-4 h-4 text-gray-600" />
           </button>
-          <button className="p-1.5 hover:bg-gray-100 rounded">
+
+          <button className="p-1.5 hover:bg-gray-100 ">
             <i className="bi bi-justify w-4 h-4 text-gray-600" />
           </button>
         </div>
 
         {/* 4th Section */}
         <div className="flex items-center gap-2">
-          <button className="p-1.5 hover:bg-gray-100 rounded">
+          <button className="p-1.5 hover:bg-gray-100 ">
             <i className="bi bi-share w-4 h-4 text-gray-600" />
           </button>
-          <button className="p-1.5 hover:bg-gray-100 rounded">
+          <button className="p-1.5 hover:bg-gray-100 ">
             <i className="bi bi-bookmark w-4 h-4 text-gray-600" />
           </button>
-          <button className="p-1.5 hover:bg-gray-100 rounded">
+          <button className="p-1.5 hover:bg-gray-100 ">
             <i className="bi bi-chat-left w-4 h-4 text-gray-600" />
           </button>
-          <button className="p-1.5 hover:bg-gray-100 rounded">
+          <button className="p-1.5 hover:bg-gray-100 ">
             <i
               className="bi bi-info-circle w-4 h-4 text-gray-600"
               onClick={toggleNotebar}
@@ -192,7 +231,7 @@ export function Header({
   {/* Add Group */}
   <div className="flex items-center gap-1 px-2 border-l">
     <button
-    // onClick={onNewDocument} className="p-1.5 hover:bg-gray-100 rounded"
+    // onClick={onNewDocument} className="p-1.5 hover:bg-gray-100 "
     >
       <i className="bi bi-plus-lg w-4 h-4 text-gray-600" />
     </button>

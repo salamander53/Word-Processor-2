@@ -16,7 +16,7 @@ export function Corkboard({
   selectedPath,
 }: CorkboardProps) {
   return (
-    <div className="p-5 bg-gray-200 min-h-full">
+    <div className="p-5 bg-white min-h-full">
       <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {items
           ? Object.values(items).map((item) => (
@@ -25,7 +25,7 @@ export function Corkboard({
                 onClick={() => onSelect(item)}
                 onDoubleClick={() => onDoubleClick(item.path)}
                 className={`
-              relative bg-white shadow-sm border border-gray-200 
+              relative bg-white shadow-lg border-2 border-gray-200 
               hover:shadow-md transition-all duration-200 cursor-pointer
               ${selectedPath === item.path ? 'ring-2 ring-blue-500' : ''}
               transform hover:-translate-y-0.5 p-2
@@ -33,7 +33,10 @@ export function Corkboard({
                 style={{
                   minWidth: '150px',
                   minHeight: '200px',
-                  // maxHeight: '300px',
+                  maxHeight: '300px',
+                  overflow: 'hidden',
+                  display: 'flex',
+                  flexDirection: 'column',
                 }}
               >
                 {/* Card Header */}
@@ -42,14 +45,13 @@ export function Corkboard({
                   <h3 className="ms-2 font-medium text-sm mb-2 truncate">
                     {item.name}
                   </h3>
-                  {/* <ChevronRight className="w-4 h-4 text-gray-400" /> */}
                 </div>
 
                 {/* Card Content */}
-                <div>
+                <div className="flex-grow overflow-hidden">
                   {item.isFile && item.content && (
-                    <p className="text-gray-500 font-thin text-sm">
-                      {item.content.substring(0, 300)}...
+                    <p className="text-gray-500 font-thin text-xs overflow-hidden text-ellipsis">
+                      {item.content.substring(0, 500)}...
                     </p>
                   )}
                   {!item.isFile && (
