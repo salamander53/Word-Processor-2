@@ -4,7 +4,7 @@ import { FolderType } from '../types';
 
 interface CorkboardProps {
   items: Record<string, FolderType>;
-  onSelect: (path: string) => void;
+  onSelect: (item: FolderType) => void;
   onDoubleClick: (path: string) => void;
   selectedPath: string | null;
 }
@@ -16,13 +16,13 @@ export function Corkboard({
   selectedPath,
 }: CorkboardProps) {
   return (
-    <div className="p-5 bg-gray-50 min-h-full">
+    <div className="p-5 bg-gray-200 min-h-full">
       <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {items
           ? Object.values(items).map((item) => (
               <div
                 key={item.path}
-                onClick={() => onSelect(item.path)}
+                onClick={() => onSelect(item)}
                 onDoubleClick={() => onDoubleClick(item.path)}
                 className={`
               relative bg-white shadow-sm border border-gray-200 

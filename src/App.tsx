@@ -11,7 +11,7 @@ import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 const router = createBrowserRouter([
   {
-    path: '/',
+    path: '/home',
     element: <HomePage />,
   },
   {

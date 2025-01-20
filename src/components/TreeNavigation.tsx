@@ -49,7 +49,11 @@ export function TreeNavigation({
   const [editingPath, setEditingPath] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
-  const [tempName, setTempName] = useState<string>('');
+  const [tempItem, setTempItem] = useState<{
+    path: string;
+    type: 'folder' | 'document';
+  } | null>(null);
+  const [tempName, setTempName] = useState('');
 
   // Mở context menu
   // Mở context menu
@@ -124,7 +128,7 @@ export function TreeNavigation({
         />
 
         {/* Tên mục */}
-        {isEditing ? (
+        {isEditing && editingPath === item.path ? (
           <form
             className="flex-1"
             onSubmit={(e) => handleRenameSubmit(e, item.path)}
@@ -136,10 +140,13 @@ export function TreeNavigation({
               placeholder={editingName}
               autoFocus
               className="w-full px-1 py-0.5 text-xs border rounded transition-all duration-200 focus:ring focus:ring-blue-300"
+              onBlur={() => {
+                setEditingPath(null); // Tắt chế độ chỉnh sửa nếu mất focus
+              }}
             />
           </form>
         ) : (
-          <span className={`flex-1 text-xs px-1 py-0.5 rounded `}>
+          <span className={`flex-1 text-xs px-1 py-0.5 rounded`}>
             {item.name}
           </span>
         )}
@@ -149,26 +156,56 @@ export function TreeNavigation({
 
   // Render children (đệ quy)
   const renderChildren = () => {
-    if (!folder.children || !isExpanded) return null;
+    const children = Object.values(folder.children || {}).filter((child) =>
+      showDeleted ? child.deleted : !child.deleted
+    );
 
-    return Object.values(folder.children)
-      .filter((child) => (showDeleted ? child.deleted : !child.deleted))
-      .map((child) => (
-        <TreeNavigation
-          key={child.path}
-          folder={child}
-          selectedPath={selectedPath}
-          onToggleFolder={onToggleFolder}
-          onSelectItem={onSelectItem}
-          onRename={onRename}
-          onAddFolder={onAddFolder}
-          onAddDocument={onAddDocument}
-          onDelete={onDelete}
-          onRestore={onRestore}
-          showDeleted={showDeleted}
-          onChangeIcon={onChangeIcon}
-        />
-      ));
+    return (
+      <>
+        {children.map((child) => (
+          <TreeNavigation
+            key={child.path}
+            folder={child}
+            selectedPath={selectedPath}
+            onToggleFolder={onToggleFolder}
+            onSelectItem={onSelectItem}
+            onRename={onRename}
+            onAddFolder={onAddFolder}
+            onAddDocument={onAddDocument}
+            onDelete={onDelete}
+            onRestore={onRestore}
+            showDeleted={showDeleted}
+            onChangeIcon={onChangeIcon}
+          />
+        ))}
+
+        {/* Hiển thị item tạm thời */}
+        {tempItem?.path === folder.path && (
+          <div className="flex items-center px-2 py-1">
+            <input
+              type="text"
+              value={tempName}
+              onChange={(e) => setTempName(e.target.value)}
+              placeholder={`Enter ${tempItem.type === 'folder' ? 'folder' : 'document'} name`}
+              autoFocus
+              onBlur={() => setTempItem(null)} // Xóa item tạm thời nếu mất focus
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && tempName.trim()) {
+                  if (tempItem.type === 'folder') {
+                    onAddFolder(folder.path, tempName.trim());
+                  } else {
+                    onAddDocument(folder.path, tempName.trim());
+                  }
+                  setTempItem(null); // Xóa item tạm thời sau khi thêm
+                  setTempName('');
+                }
+              }}
+              className="w-full px-2 py-1 border rounded focus:ring focus:ring-blue-300"
+            />
+          </div>
+        )}
+      </>
+    );
   };
 
   return (
@@ -193,12 +230,10 @@ export function TreeNavigation({
           deleted={contextMenu.deleted}
           onClose={() => setContextMenu(null)}
           onAddFolder={() => {
-            onAddFolder(contextMenu.path);
-            setContextMenu(null);
+            setTempItem({ path: folder.path, type: 'folder' });
           }}
           onAddDocument={() => {
-            onAddDocument(contextMenu.path);
-            setContextMenu(null);
+            setTempItem({ path: folder.path, type: 'document' });
           }}
           onDelete={() => {
             onDelete(contextMenu.path, contextMenu.isFile);

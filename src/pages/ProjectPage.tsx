@@ -148,11 +148,11 @@ export function ProjectPage() {
       toast.error('Failed to restore.');
     }
   };
-  const handleAddFolder = async (parentPath: string) => {
+  const handleAddFolder = async (path: string, name: string) => {
     try {
       await AxiosInstance.post('folders/create', {
-        name: 'New Folder',
-        path: `${parentPath}/new_folder`,
+        name: name,
+        path: `${path}/${transformString(name)}`,
         isFile: false,
       });
       // toast.success('Folder created.');
@@ -161,11 +161,12 @@ export function ProjectPage() {
       toast.error('Failed to create folder.');
     }
   };
-  const handleAddDocument = async (parentPath: string) => {
+  const handleAddDocument = async (path: string, name: string) => {
+    // console.log(parentPath);
     try {
       await AxiosInstance.post('folders/create', {
-        name: 'New Document',
-        path: `${parentPath}/new_document.txt`,
+        name: name,
+        path: `${path}/${transformString(name)}.txt`,
         isFile: true,
       });
       // toast.success('Document created.');
@@ -260,6 +261,11 @@ export function ProjectPage() {
     }
     return null;
   };
+  const transformString = (input: string) => {
+    let upperCaseString = input.toLowerCase();
+    let transformedString = upperCaseString.replace(/\s+/g, '_');
+    return transformedString;
+  };
 
   return (
     <div
@@ -321,12 +327,55 @@ export function ProjectPage() {
             />
           ) : showDeleted ? (
             <div className="p-4">
-              <h2 className="text-lg font-semibold mb-4">Trash</h2>
-              {/* Nội dung thùng rác */}
+              <div className="p-4 ">
+                <h2 className="text-lg font-semibold mb-4">Trash</h2>
+                {folders ? (
+                  <ul
+                    className="space-y-2 overflow-y-auto"
+                    style={{ maxHeight: '500px' }}
+                  >
+                    {getDeletedItems(folders).map((item) => (
+                      <li
+                        key={item.path}
+                        className="flex items-center justify-between bg-gray-100 p-2 rounded-md hover:shadow"
+                      >
+                        <div className="flex items-center gap-4 p-2 rounded-lg bg-gray-100 hover:bg-gray-200">
+                          <i
+                            className={`${
+                              item.icon ||
+                              (item.isFile
+                                ? 'bi-file-earmark-text'
+                                : 'bi-folder')
+                            } text-gray-500`}
+                          />
+                          <div className="flex flex-col">
+                            <span className="font-semibold text-black">
+                              {item.name}
+                            </span>
+                            <span className="text-sm text-gray-600">
+                              {getPathAsString(item.path)}
+                            </span>
+                          </div>
+                        </div>
+
+                        <button
+                          className="text-green-600 hover:underline"
+                          onClick={() => handleRestore(item.path)}
+                        >
+                          Restore
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <div className="text-gray-500">Trash is empty</div>
+                )}
+              </div>
             </div>
           ) : showCoarkBoard ? (
             <Corkboard
               items={findItemByPath(folders, selectedPath)?.children}
+              onSelect={handleSelectItem}
               selectedPath={selectedPath}
             />
           ) : (

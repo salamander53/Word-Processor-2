@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 interface HeaderProps {
   onNewFolder: () => void;
@@ -23,6 +23,8 @@ export function Header({
     const pathComponents = path.split('/').filter((component) => component);
     return pathComponents.join(' > ');
   };
+
+  const navigate = useNavigate();
 
   return (
     // <header className="flex items-center justify-between px-6 py-3 bg-white border-b">
@@ -79,10 +81,13 @@ export function Header({
           {/* <RouterLink to="/" className="p-1.5 hover:bg-gray-100 rounded">
             <ChevronLeft className="w-4 h-4 text-gray-600" />
           </RouterLink> */}
-          <Link to="/" className="p-1.5 hover:bg-gray-100 rounded">
+          <button
+            className="p-1.5 hover:bg-gray-100 rounded"
+            onClick={() => navigate(-1)}
+          >
             <i className="bi bi-arrow-left w-4 h-4"></i>
             {/* Back to Projects */}
-          </Link>
+          </button>
           <button className="p-1.5 hover:bg-gray-100  flex items-center space-x-1 border-l">
             <i
               className="bi bi-search  text-gray-600"
@@ -116,7 +121,7 @@ export function Header({
           <div className="flex items-center gap-1 px-1 border-l">
             <button
               onClick={onToggleTrash}
-              className={`p-1.5 rounded ${showTrash ? 'bg-gray-100' : 'hover:bg-gray-100'}`}
+              className={`p-1.5 rounded ${showTrash ? 'bg-gray-400' : 'hover:bg-gray-100'}`}
             >
               <i className="bi bi-trash w-4 h-4 text-red-600" />
             </button>

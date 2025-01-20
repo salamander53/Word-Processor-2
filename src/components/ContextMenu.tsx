@@ -31,6 +31,8 @@ export function ContextMenu({
   deleted,
 }: ContextMenuProps) {
   const [showIconPicker, setShowIconPicker] = useState(false);
+  const [isNaming, setIsNaming] = useState(false);
+  const [newName, setNewName] = useState('');
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -59,14 +61,20 @@ export function ContextMenu({
       {isFolder && (
         <>
           <button
-            onClick={onAddFolder}
+            onClick={() => {
+              onAddFolder?.();
+              // onClose(); // Đóng context menu sau khi chọn
+            }}
             className="w-full px-4 py-2 text-left flex items-center gap-2 hover:bg-gray-100"
           >
             <i className="bi bi-folder-plus w-4 h-4"></i>
             <span>New Folder</span>
           </button>
           <button
-            onClick={onAddDocument}
+            onClick={() => {
+              onAddDocument?.();
+              onClose(); // Đóng context menu sau khi chọn
+            }}
             className="w-full px-4 py-2 text-left flex items-center gap-2 hover:bg-gray-100"
           >
             <i className="bi bi-file-earmark w-4 h-4"></i>
