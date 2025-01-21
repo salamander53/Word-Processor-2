@@ -156,6 +156,7 @@ export function TreeNavigation({
 
   // Render children (đệ quy)
   const renderChildren = () => {
+    if (!isExpanded) return null;
     const children = Object.values(folder.children || {}).filter((child) =>
       showDeleted ? child.deleted : !child.deleted
     );
@@ -182,6 +183,9 @@ export function TreeNavigation({
         {/* Hiển thị item tạm thời */}
         {tempItem?.path === folder.path && (
           <div className="flex items-center px-2 py-1">
+            <i
+              className={`bi ${tempItem.type === 'folder' ? 'bi-folder' : 'bi-file-earmark-text'} mr-2 transition-transform duration-200 group-hover:scale-110 text-xs`}
+            />
             <input
               type="text"
               value={tempName}
@@ -200,7 +204,7 @@ export function TreeNavigation({
                   setTempName('');
                 }
               }}
-              className="w-full px-2 py-1 border rounded focus:ring focus:ring-blue-300"
+              className="w-full px-2 py-1 focus:ring focus:ring-blue-300"
             />
           </div>
         )}

@@ -73,7 +73,7 @@ export function ContextMenu({
           <button
             onClick={() => {
               onAddDocument?.();
-              onClose(); // Đóng context menu sau khi chọn
+              // onClose(); // Đóng context menu sau khi chọn
             }}
             className="w-full px-4 py-2 text-left flex items-center gap-2 hover:bg-gray-100"
           >

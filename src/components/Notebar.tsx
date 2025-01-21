@@ -17,7 +17,7 @@ interface NotebarProps {
 export const Notebar = ({ isOpen, currentFolder }: NotebarProps) => {
   const [view, setView] = useState<string>('note');
   const [isSummaryOpen, setIsSummaryOpen] = useState(true);
-  const [isNotesOpen, setIsNotesOpen] = useState(false);
+  const [isNotesOpen, setIsNotesOpen] = useState(true);
   const toggleSummary = () => setIsSummaryOpen(!isSummaryOpen);
   const toggleNotes = () => setIsNotesOpen(!isNotesOpen);
 
@@ -58,6 +58,7 @@ export const Notebar = ({ isOpen, currentFolder }: NotebarProps) => {
       {view === 'note' ? (
         <>
           <div>
+            {/* Tóm tắt */}
             <div className="border-bottom">
               <button
                 className="w-100 d-flex align-items-center justify-content-start bg-gray-50 border-1"
@@ -66,24 +67,33 @@ export const Notebar = ({ isOpen, currentFolder }: NotebarProps) => {
                 <i
                   className={`bi ${isSummaryOpen ? 'bi-chevron-down' : 'bi-chevron-right'}`}
                 />
-
                 <span className="ms-1 text-sm">Tóm tắt</span>
               </button>
               {isSummaryOpen && (
                 <ResizableBox
-                  width={200}
-                  height={200}
-                  // draggableOpts="true"
-                  minConstraints={[200, 100]}
-                  maxConstraints={[200, 550]}
+                  width={200} // Chiều rộng cố định
+                  height={200} // Chiều cao mặc định
+                  minConstraints={[200, 100]} // Giới hạn chiều cao tối thiểu
+                  maxConstraints={[200, 550]} // Giới hạn chiều cao tối đa
+                  className="border p-2"
                 >
-                  <p className="text-xs">{currentFolder?.name}</p>
+                  <textarea
+                    className="w-100 h-100 border-0 font-thin text-sm"
+                    style={{
+                      resize: 'none', // Tắt resize mặc định của textarea
+                      overflow: 'auto',
+                      outline: 'none',
+                    }}
+                    placeholder={
+                      currentFolder?.name || 'Nhập văn bản tại đây...'
+                    }
+                  />
                 </ResizableBox>
               )}
             </div>
-          </div>
-          <div>
-            <div>
+
+            {/* Ghi chú */}
+            <div className="mt-3">
               <button
                 className="w-100 d-flex align-items-center justify-content-start bg-gray-50 border-1"
                 onClick={toggleNotes}
@@ -94,9 +104,25 @@ export const Notebar = ({ isOpen, currentFolder }: NotebarProps) => {
                 <span className="ms-1 text-sm">Ghi chú</span>
               </button>
               {isNotesOpen && (
-                <div className="p-2">
-                  <p className="text-xs">{currentFolder?.name}</p>
-                </div>
+                <ResizableBox
+                  width={200} // Chiều rộng cố định
+                  height={200} // Chiều cao mặc định
+                  minConstraints={[200, 100]} // Giới hạn chiều cao tối thiểu
+                  maxConstraints={[200, 550]} // Giới hạn chiều cao tối đa
+                  className="border p-2"
+                >
+                  <textarea
+                    className="w-100 h-100 border-0 font-thin text-sm"
+                    style={{
+                      resize: 'none',
+                      overflow: 'auto',
+                      outline: 'none',
+                    }}
+                    placeholder={
+                      currentFolder?.name || 'Nhập ghi chú tại đây...'
+                    }
+                  />
+                </ResizableBox>
               )}
             </div>
           </div>
