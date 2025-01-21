@@ -31,6 +31,7 @@ export function ProjectPage() {
   const [showCoarkBoard, setShowCoarkBoard] = useState<any>();
   const [viewMode, setViewMode] = useState<'editor' | 'corkboard'>('editor');
   const [isNoteBarOpen, setIsNoteBarOpen] = useState(false);
+  const [textContent, setTextContent] = useState<string>('');
 
   // const [currentFolderPath, setCurrentFolderPath] =
   //   useState<string>('/john_doe/my_docs');
@@ -131,7 +132,7 @@ export function ProjectPage() {
       toast.error('Rename failed.');
     }
   };
-  const handleDelete = async (path: string) => {
+  const handleRemove = async (path: string) => {
     try {
       await AxiosInstance.post('folders/remove', { path });
       // toast.success('Deleted successfully.');
@@ -268,6 +269,33 @@ export function ProjectPage() {
     return transformedString;
   };
 
+  const handleDelete = async (path: string) => {
+    try {
+      await AxiosInstance.delete('folders/delete', { data: { path } });
+      // toast.success('Deleted successfully.');
+      loadFolders();
+    } catch (error) {
+      toast.error('Failed to delete.');
+    }
+    console.log(path);
+  };
+  const handleNoteSummaryChange = (summary: string, note: string) => {
+    // Cập nhật currentFolder với summary và note mới
+    // setcurrentFolder((prevFolder) => ({
+    //   ...prevFolder,
+    //   summary,
+    //   note,
+    // }));
+
+    // Lưu vào localStorage nếu cần
+    // if (currentFolder) {
+    //   localStorage.setItem(currentFolder.path, JSON.stringify({ ...currentFolder, summary, note }));
+    // }
+
+    console.log('Updated Summary:', summary);
+    console.log('Updated Note:', note);
+  };
+
   return (
     <div
       className="flex flex-col h-screen bg-gray-50"
@@ -300,12 +328,13 @@ export function ProjectPage() {
               onSelectItem={handleSelectItem}
               onToggleFolder={setSelectedPath}
               onRename={handleRename}
-              onDelete={handleDelete}
+              onRemove={handleRemove}
               onRestore={handleRestore}
               onAddFolder={handleAddFolder}
               onAddDocument={handleAddDocument}
               showDeleted={showDeleted}
               onChangeIcon={handleChangeIcon}
+              onDelete={handleDelete}
             />
           )}
           <div
@@ -363,6 +392,12 @@ export function ProjectPage() {
                             </span>
                           </div>
                         </div>
+                        <button
+                          className="text-red-600 hover:underline"
+                          onClick={() => handleDelete(item.path)}
+                        >
+                          Delete
+                        </button>
 
                         <button
                           className="text-green-600 hover:underline"
@@ -389,7 +424,11 @@ export function ProjectPage() {
           )}
         </main>
 
-        <Notebar isOpen={isNoteBarOpen} currentFolder={currentFolder} />
+        <Notebar
+          isOpen={isNoteBarOpen}
+          currentFolder={currentFolder}
+          onChange={handleNoteSummaryChange}
+        />
       </div>
     </div>
   );

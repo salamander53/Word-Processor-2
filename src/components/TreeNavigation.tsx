@@ -10,13 +10,14 @@ interface TreeNavigationProps {
   onToggleFolder: (path: string) => void;
   onSelectItem: (item: FolderType) => void;
   //   onFolderSelect: (path: string) => void;
-  onDelete: (path: string, isFile: boolean) => void;
+  onRemove: (path: string, isFile: boolean) => void;
   onRestore: (path: string) => void;
   onRename: (path: string, newName: string) => void;
   onAddFolder: (parentPath: string) => void;
   onAddDocument: (parentPath: string) => void;
   onChangeIcon: (path: string, icon: string) => void;
   showDeleted?: boolean; // Hiển thị các mục bị xóa nếu true
+  onDelete: (path: string) => void;
 }
 
 interface ContextMenuState {
@@ -36,13 +37,14 @@ export function TreeNavigation({
   onToggleFolder,
   onSelectItem,
   //   onFolderSelect,
-  onDelete,
+  onRemove,
   onRestore,
   onRename,
   onAddFolder,
   onAddDocument,
   onChangeIcon,
   showDeleted = false,
+  onDelete,
 }: TreeNavigationProps) {
   //   const isExpanded = expandedFolders.has(folder?.path);
   const [isExpanded, setIsExpanded] = useState(true);
@@ -173,7 +175,7 @@ export function TreeNavigation({
             onRename={onRename}
             onAddFolder={onAddFolder}
             onAddDocument={onAddDocument}
-            onDelete={onDelete}
+            onRemove={onRemove}
             onRestore={onRestore}
             showDeleted={showDeleted}
             onChangeIcon={onChangeIcon}
@@ -239,8 +241,8 @@ export function TreeNavigation({
           onAddDocument={() => {
             setTempItem({ path: folder.path, type: 'document' });
           }}
-          onDelete={() => {
-            onDelete(contextMenu.path, contextMenu.isFile);
+          onRemove={() => {
+            onRemove(contextMenu.path, contextMenu.isFile);
             setContextMenu(null);
           }}
           onRestore={() => {
@@ -255,6 +257,10 @@ export function TreeNavigation({
           onChangeIcon={(iconName) => {
             const selectedPath = contextMenu.path;
             onChangeIcon(selectedPath, iconName); // Gọi `onChangeIcon`
+            setContextMenu(null);
+          }}
+          onDelete={() => {
+            onDelete(contextMenu.path);
             setContextMenu(null);
           }}
         />

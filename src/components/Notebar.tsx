@@ -1,25 +1,34 @@
 import React, { useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import {
-  FileText,
-  Bookmark,
-  Edit2,
-  Camera,
-  MessageSquare,
-  ChevronDown,
-} from 'lucide-react';
 import { ResizableBox } from 'react-resizable';
 interface NotebarProps {
   isOpen: boolean;
   currentFolder: any;
+  onChange: (summary: string, note: string) => void;
 }
 
-export const Notebar = ({ isOpen, currentFolder }: NotebarProps) => {
+export const Notebar = ({ isOpen, currentFolder, onChange }: NotebarProps) => {
   const [view, setView] = useState<string>('note');
   const [isSummaryOpen, setIsSummaryOpen] = useState(true);
   const [isNotesOpen, setIsNotesOpen] = useState(true);
+  const [summary, setSummary] = React.useState(currentFolder?.summary || '');
+  const [note, setNote] = React.useState(currentFolder?.note || '');
   const toggleSummary = () => setIsSummaryOpen(!isSummaryOpen);
   const toggleNotes = () => setIsNotesOpen(!isNotesOpen);
+
+  const handleSummaryChange = (
+    event: React.ChangeEvent<HTMLTextAreaElement>
+  ) => {
+    const newSummary = event.target.value;
+    setSummary(newSummary);
+    onChange(newSummary, note); // Gửi giá trị mới về ProjectPage
+  };
+
+  const handleNoteChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newNote = event.target.value;
+    setNote(newNote);
+    onChange(summary, newNote); // Gửi giá trị mới về ProjectPage
+  };
 
   return (
     <div
@@ -87,6 +96,8 @@ export const Notebar = ({ isOpen, currentFolder }: NotebarProps) => {
                     placeholder={
                       currentFolder?.name || 'Nhập văn bản tại đây...'
                     }
+                    onChange={handleSummaryChange}
+                    value={summary}
                   />
                 </ResizableBox>
               )}
@@ -121,6 +132,8 @@ export const Notebar = ({ isOpen, currentFolder }: NotebarProps) => {
                     placeholder={
                       currentFolder?.name || 'Nhập ghi chú tại đây...'
                     }
+                    onChange={handleNoteChange} // Gọi hàm khi thay đổi nội dung
+                    value={note}
                   />
                 </ResizableBox>
               )}

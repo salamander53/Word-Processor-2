@@ -1,5 +1,4 @@
 import React from 'react';
-import { File, Folder, ChevronRight } from 'lucide-react';
 import { FolderType } from '../types';
 
 interface CorkboardProps {
@@ -16,7 +15,7 @@ export function Corkboard({
   selectedPath,
 }: CorkboardProps) {
   return (
-    <div className="p-5 bg-white min-h-full">
+    <div className="p-5 bg-white min-h-full overflow-y-auto">
       <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {items
           ? Object.values(items).map((item) => (
@@ -25,22 +24,23 @@ export function Corkboard({
                 onClick={() => onSelect(item)}
                 onDoubleClick={() => onDoubleClick(item.path)}
                 className={`
-              relative bg-white shadow-lg border-2 border-gray-200 
-              hover:shadow-md transition-all duration-200 cursor-pointer
-              ${selectedPath === item.path ? 'ring-2 ring-blue-500' : ''}
-              transform hover:-translate-y-0.5 p-2
+             relative bg-white shadow-lg border-2 border-gray-200 
+                transition-all duration-300 cursor-pointer
+                ${selectedPath === item.path ? 'ring-2 ring-blue-500' : ''}
+                hover:scale-125 hover:shadow-2xl
             `}
                 style={{
-                  minWidth: '150px',
-                  minHeight: '200px',
-                  maxHeight: '300px',
+                  minWidth: '225px',
+                  minHeight: '250px',
+                  maxHeight: '250px',
+                  maxWidth: '225px',
                   overflow: 'hidden',
                   display: 'flex',
                   flexDirection: 'column',
                 }}
               >
                 {/* Card Header */}
-                <div className="flex justify-start">
+                <div className="flex justify-start  border-b-2 bg-gray-50">
                   <i className={`bi ${item.icon}`} />
                   <h3 className="ms-2 font-medium text-sm mb-2 truncate">
                     {item.name}
@@ -48,11 +48,14 @@ export function Corkboard({
                 </div>
 
                 {/* Card Content */}
-                <div className="flex-grow overflow-hidden">
+                <div className="flex-grow overflow-hidden overflow-y-auto text-gray-500">
                   {item.isFile && item.content && (
-                    <p className="text-gray-500 font-thin text-xs overflow-hidden text-ellipsis">
-                      {item.content.substring(0, 500)}...
-                    </p>
+                    <div
+                      className="text-gray-500 font-thin text-xs text-ellipsis"
+                      dangerouslySetInnerHTML={{
+                        __html: item.content, // Lấy 500 ký tự đầu tiên
+                      }}
+                    ></div>
                   )}
                   {!item.isFile && (
                     <div className="text-gray-500">
@@ -64,13 +67,13 @@ export function Corkboard({
                 </div>
 
                 {/* Card Footer */}
-                <div className="mt-2 text-gray-500 text-xs">
+                {/* <div className="mt-2 text-gray-500 text-xs">
                   <div className="flex items-center justify-between">
                     <span>{item.isFile ? 'Document' : 'Folder'}</span>
                     <span>•</span>
                     <span>Modified 2h ago</span>
                   </div>
-                </div>
+                </div> */}
               </div>
             ))
           : 'Create Documents/Subfolders'}

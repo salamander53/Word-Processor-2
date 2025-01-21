@@ -146,9 +146,9 @@ export function Header({
         </div>
 
         {/* 2nd Section */}
-        <div className="flex-1 flex items-center justify-center ml-52">
+        <div className="flex-1 flex items-center justify-center ">
           <div
-            className="w-100 px-3 py-1 bg-white border flex justify-center gap-2"
+            className="w-50 px-3 py-1 bg-white border flex justify-center gap-2"
             onClick={() => setViewSearchBar('search')}
             onPointerLeave={() => setViewSearchBar('normal')}
           >
@@ -166,10 +166,6 @@ export function Header({
               ''
             )}
           </div>
-        </div>
-
-        {/* 3rd Section */}
-        <div className="flex-1 flex items-center justify-center">
           <button
             className={`p-1.5 ${showCoarkBoard ? 'bg-gray-300' : 'hover:bg-gray-100'} `}
             onClick={
@@ -189,6 +185,11 @@ export function Header({
             <i className="bi bi-justify w-4 h-4 text-gray-600" />
           </button>
         </div>
+
+        {/* 3rd Section */}
+        {/* <div className="flex-1 flex items-center justify-center">
+          
+        </div> */}
 
         {/* 4th Section */}
         <div className="flex items-center gap-2">
