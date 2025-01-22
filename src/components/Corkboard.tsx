@@ -1,19 +1,20 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { FolderType } from '../types';
 
 interface CorkboardProps {
   items: Record<string, FolderType>;
-  onSelect: (item: FolderType, isFromCorkBoard: boolean) => void;
-  onDoubleClick: (path: string) => void;
-  selectedPath: string | null;
+  onSelect: (selectedNotePath: string, isDoubleClick: boolean) => void;
+  // onDoubleClick: (path: string, isDoubleClick: boolean) => void;
+  currentFolder: FolderType | null;
 }
 
 export function Corkboard({
   items,
   onSelect,
-  onDoubleClick,
-  selectedPath,
+  // currentFolder,
 }: CorkboardProps) {
+  const [selectedNote, setSelectedNote] = useState<string>();
+  // console.log(selectedNote);
   return (
     <div className="p-5 bg-white min-h-full overflow-y-auto">
       <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -21,19 +22,21 @@ export function Corkboard({
           ? Object.values(items).map((item) => (
               <div
                 key={item.path}
-                onClick={() => onSelect(item, true)}
-                onDoubleClick={() => onDoubleClick(item.path)}
+                onClick={() => {
+                  setSelectedNote(item.path);
+                  onSelect(item.path, false);
+                }}
+                onDoubleClick={() => onSelect(item.path, true)}
                 className={`
-             relative bg-white shadow-lg border-2 border-gray-200 
+             relative bg-white shadow-lg border-1 border-gray-200 
                 transition-all duration-300 cursor-pointer
-                ${selectedPath === item.path ? 'ring-2 ring-blue-500' : ''}
+               ${selectedNote === item.path && 'border-blue-600 '}
                 hover:scale-125 hover:shadow-2xl
             `}
                 style={{
-                  minWidth: '225px',
                   minHeight: '250px',
                   maxHeight: '250px',
-                  maxWidth: '225px',
+
                   overflow: 'hidden',
                   display: 'flex',
                   flexDirection: 'column',
@@ -49,21 +52,28 @@ export function Corkboard({
 
                 {/* Card Content */}
                 <div className="flex-grow overflow-hidden overflow-y-auto text-gray-500">
-                  {item.isFile && !item.summary ? (
-                    <div
-                      className="text-gray-500 font-thin text-xs text-ellipsis"
-                      dangerouslySetInnerHTML={{
-                        __html: item.content, // Lấy 500 ký tự đầu tiên
-                      }}
-                    ></div>
-                  ) : (
-                    <p className={`text-xs text-dark`}>{item.summary}</p>
-                  )}
+                  {item.isFile &&
+                    (!item.summary ? (
+                      <div
+                        className="text-gray-500 font-thin text-xs text-ellipsis"
+                        dangerouslySetInnerHTML={{
+                          __html: item.content, // Lấy 500 ký tự đầu tiên
+                        }}
+                      />
+                    ) : (
+                      <>
+                        <p className={`text-xs text-dark`}>
+                          <label className="text-gray-300"># Note</label> <br />
+                          {item.summary}
+                        </p>
+                      </>
+                    ))}
                   {!item.isFile && (
                     <div className="text-gray-500">
                       <span>
                         {Object.keys(item.children || {}).length} items
                       </span>
+                      <p className={`text-xs text-dark`}>{item.summary}</p>
                     </div>
                   )}
                 </div>

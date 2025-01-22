@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FolderType } from '../types';
+import SearchBar from './SearchBar';
 
 interface HeaderProps {
   onNewFolder: () => void;
@@ -146,11 +147,11 @@ export function Header({
         </div>
 
         {/* 2nd Section */}
+        {/* {console.log(viewSearchBar)} */}
         <div className="flex-1 flex items-center justify-center ">
           <div
             className="w-50 px-3 py-1 bg-white border flex justify-center gap-2"
             onClick={() => setViewSearchBar('search')}
-            onPointerLeave={() => setViewSearchBar('normal')}
           >
             {viewSearchBar === 'normal' ? (
               <span className="text-sm ">
@@ -158,11 +159,16 @@ export function Header({
               </span>
             ) : viewSearchBar === 'search' ? (
               <>
-                <i className="bi bi-search" />
-                <input
+                <i className="bi bi-search me-2" />
+                {/* <input
                   type="search"
                   className="w-100 px-3 py-1 bg-white gap-2 text-sm "
-                ></input>
+                /> */}
+                <SearchBar
+                  folders={folders}
+                  onSelectItem={onSelectItem}
+                  set={setViewSearchBar}
+                />
               </>
             ) : (
               ''

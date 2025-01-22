@@ -35,7 +35,7 @@ export function ProjectPage() {
 
   // const [currentFolderPath, setCurrentFolderPath] =
   //   useState<string>('/john_doe/my_docs');
-
+  // console.log(folders);
   useEffect(() => {
     loadFolders();
   }, [folders]);
@@ -55,7 +55,7 @@ export function ProjectPage() {
       if (hasUnsavedChanges) {
         handleSave();
       }
-    }, 5000);
+    }, 2000);
     return () => clearInterval(interval);
   }, [
     currentFolder?.content || currentFolder?.summary || currentFolder?.note,
@@ -74,15 +74,18 @@ export function ProjectPage() {
   //     window.removeEventListener('keydown', handleKeyDown);
   //   };
   // }, [selectedPath, currentFolder?.content, hasUnsavedChanges]);
-
-  const handleSelectItem = async (
-    item: FolderType,
-    isFromCorkBoard: boolean
+  const handleSelectNote = async (
+    selectedNotePath: string,
+    isDoubleClick: boolean
   ) => {
-    if (isFromCorkBoard) {
-      setcurrentFolder(item);
-      return;
+    if (!isDoubleClick) {
+      setcurrentFolder(findItemByPath(folders, selectedNotePath));
+    } else {
+      setSelectedPath(selectedNotePath);
+      setShowCoarkBoard(false);
     }
+  };
+  const handleSelectItem = async (item: FolderType) => {
     if (hasUnsavedChanges) {
       await handleSave();
     }
@@ -113,21 +116,22 @@ export function ProjectPage() {
   };
 
   const handleSave = async () => {
-    if (!selectedPath) return;
+    if (!selectedPath || !currentFolder) return;
+
     try {
       await AxiosInstance.post(`folders/update`, {
-        path: currentFolder?.path,
-        newContent: currentFolder?.content || '',
-        newSummary: currentFolder?.summary || '',
-        newNote: currentFolder?.note || '',
+        path: currentFolder.path,
+        newContent: currentFolder.content || '',
+        newSummary: currentFolder.summary || '',
+        newNote: currentFolder.note || '',
       });
       setHasUnsavedChanges(false);
-      localStorage.removeItem(currentFolder?.path as string);
-      // toast.success('Document saved.');
+      localStorage.removeItem(currentFolder.path as string);
     } catch (error) {
       toast.error('Failed to save document.');
     }
   };
+
   const handleRename = async (path: string, newName: string) => {
     if (!newName.trim()) {
       toast.error('Name cannot be empty.');
@@ -290,18 +294,18 @@ export function ProjectPage() {
   };
   const handleNoteSummaryChange = (summary: string, note: string) => {
     // Cập nhật currentFolder với summary và note mới
-    setcurrentFolder((prevFolder) => ({
-      ...prevFolder,
+    const updatedFolder = {
+      ...currentFolder,
       summary,
       note,
-    }));
-    // Lưu vào localStorage nếu cần
+    };
+
+    setcurrentFolder(updatedFolder);
     setHasUnsavedChanges(true);
-    if (currentFolder) {
-      localStorage.setItem(
-        currentFolder.path,
-        JSON.stringify({ ...currentFolder, summary, note })
-      );
+
+    // Lưu vào localStorage nếu cần
+    if (updatedFolder) {
+      localStorage.setItem(updatedFolder.path, JSON.stringify(updatedFolder));
     }
   };
 
@@ -425,8 +429,8 @@ export function ProjectPage() {
           ) : showCoarkBoard ? (
             <Corkboard
               items={findItemByPath(folders, selectedPath)?.children}
-              onSelect={handleSelectItem}
-              selectedPath={selectedPath}
+              onSelect={handleSelectNote}
+              // currentFolder={currentFolder}
             />
           ) : (
             <div className="text-center mt-20">Select a document to edit</div>
