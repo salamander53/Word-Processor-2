@@ -76,7 +76,7 @@ export const Notebar = ({ isOpen, currentFolder, onChange }: NotebarProps) => {
                 <i
                   className={`bi ${isSummaryOpen ? 'bi-chevron-down' : 'bi-chevron-right'}`}
                 />
-                <span className="ms-1 text-sm">Tóm tắt</span>
+                <span className="ms-1 text-sm">Summary</span>
               </button>
               {isSummaryOpen && (
                 <ResizableBox
@@ -93,11 +93,9 @@ export const Notebar = ({ isOpen, currentFolder, onChange }: NotebarProps) => {
                       overflow: 'auto',
                       outline: 'none',
                     }}
-                    placeholder={
-                      currentFolder?.name || 'Nhập văn bản tại đây...'
-                    }
+                    placeholder={'Type summary here...'}
                     onChange={handleSummaryChange}
-                    value={summary}
+                    value={currentFolder?.summary}
                   />
                 </ResizableBox>
               )}
@@ -112,7 +110,7 @@ export const Notebar = ({ isOpen, currentFolder, onChange }: NotebarProps) => {
                 <i
                   className={`bi ${isNotesOpen ? 'bi-chevron-down' : 'bi-chevron-right'}`}
                 />
-                <span className="ms-1 text-sm">Ghi chú</span>
+                <span className="ms-1 text-sm">Note</span>
               </button>
               {isNotesOpen && (
                 <ResizableBox
@@ -129,11 +127,9 @@ export const Notebar = ({ isOpen, currentFolder, onChange }: NotebarProps) => {
                       overflow: 'auto',
                       outline: 'none',
                     }}
-                    placeholder={
-                      currentFolder?.name || 'Nhập ghi chú tại đây...'
-                    }
+                    placeholder={'Type note here...'}
                     onChange={handleNoteChange} // Gọi hàm khi thay đổi nội dung
-                    value={note}
+                    value={currentFolder?.note}
                   />
                 </ResizableBox>
               )}

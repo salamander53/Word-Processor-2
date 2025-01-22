@@ -153,7 +153,9 @@ export function Header({
             onPointerLeave={() => setViewSearchBar('normal')}
           >
             {viewSearchBar === 'normal' ? (
-              <span className="text-sm ">{currentFolder?.name}</span>
+              <span className="text-sm ">
+                {currentFolder?.name || 'Select document'}
+              </span>
             ) : viewSearchBar === 'search' ? (
               <>
                 <i className="bi bi-search" />

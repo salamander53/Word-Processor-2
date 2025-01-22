@@ -3,7 +3,7 @@ import { FolderType } from '../types';
 
 interface CorkboardProps {
   items: Record<string, FolderType>;
-  onSelect: (item: FolderType) => void;
+  onSelect: (item: FolderType, isFromCorkBoard: boolean) => void;
   onDoubleClick: (path: string) => void;
   selectedPath: string | null;
 }
@@ -21,7 +21,7 @@ export function Corkboard({
           ? Object.values(items).map((item) => (
               <div
                 key={item.path}
-                onClick={() => onSelect(item)}
+                onClick={() => onSelect(item, true)}
                 onDoubleClick={() => onDoubleClick(item.path)}
                 className={`
              relative bg-white shadow-lg border-2 border-gray-200 
@@ -49,13 +49,15 @@ export function Corkboard({
 
                 {/* Card Content */}
                 <div className="flex-grow overflow-hidden overflow-y-auto text-gray-500">
-                  {item.isFile && item.content && (
+                  {item.isFile && !item.summary ? (
                     <div
                       className="text-gray-500 font-thin text-xs text-ellipsis"
                       dangerouslySetInnerHTML={{
                         __html: item.content, // Lấy 500 ký tự đầu tiên
                       }}
                     ></div>
+                  ) : (
+                    <p className={`text-xs text-dark`}>{item.summary}</p>
                   )}
                   {!item.isFile && (
                     <div className="text-gray-500">

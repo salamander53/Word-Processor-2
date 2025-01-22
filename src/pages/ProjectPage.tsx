@@ -57,7 +57,10 @@ export function ProjectPage() {
       }
     }, 5000);
     return () => clearInterval(interval);
-  }, [currentFolder?.content, hasUnsavedChanges]);
+  }, [
+    currentFolder?.content || currentFolder?.summary || currentFolder?.note,
+    hasUnsavedChanges,
+  ]);
 
   // useEffect(() => {
   //   const handleKeyDown = (e: KeyboardEvent) => {
@@ -72,12 +75,15 @@ export function ProjectPage() {
   //   };
   // }, [selectedPath, currentFolder?.content, hasUnsavedChanges]);
 
-  const handleSelectItem = async (item: FolderType) => {
+  const handleSelectItem = async (
+    item: FolderType,
+    isFromCorkBoard: boolean
+  ) => {
+    if (isFromCorkBoard) {
+      setcurrentFolder(item);
+      return;
+    }
     if (hasUnsavedChanges) {
-      // const confirmSave = window.confirm('Bạn có muốn lưu thay đổi không?');
-      // if (confirmSave) {
-      //   await handleSave();
-      // }
       await handleSave();
     }
     if (item.isFile) {
@@ -101,16 +107,19 @@ export function ProjectPage() {
       setHasUnsavedChanges(true);
       localStorage.setItem(
         currentFolder?.path as string,
-        currentFolder?.content
+        JSON.stringify({ ...currentFolder, content })
       );
     }
   };
+
   const handleSave = async () => {
     if (!selectedPath) return;
     try {
       await AxiosInstance.post(`folders/update`, {
         path: currentFolder?.path,
         newContent: currentFolder?.content || '',
+        newSummary: currentFolder?.summary || '',
+        newNote: currentFolder?.note || '',
       });
       setHasUnsavedChanges(false);
       localStorage.removeItem(currentFolder?.path as string);
@@ -281,19 +290,19 @@ export function ProjectPage() {
   };
   const handleNoteSummaryChange = (summary: string, note: string) => {
     // Cập nhật currentFolder với summary và note mới
-    // setcurrentFolder((prevFolder) => ({
-    //   ...prevFolder,
-    //   summary,
-    //   note,
-    // }));
-
+    setcurrentFolder((prevFolder) => ({
+      ...prevFolder,
+      summary,
+      note,
+    }));
     // Lưu vào localStorage nếu cần
-    // if (currentFolder) {
-    //   localStorage.setItem(currentFolder.path, JSON.stringify({ ...currentFolder, summary, note }));
-    // }
-
-    console.log('Updated Summary:', summary);
-    console.log('Updated Note:', note);
+    setHasUnsavedChanges(true);
+    if (currentFolder) {
+      localStorage.setItem(
+        currentFolder.path,
+        JSON.stringify({ ...currentFolder, summary, note })
+      );
+    }
   };
 
   return (
