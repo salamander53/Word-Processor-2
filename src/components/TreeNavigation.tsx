@@ -90,27 +90,33 @@ export function TreeNavigation({
   };
   // Render một mục (folder/file)
   const renderItem = (item: FolderType) => {
-    if (!showDeleted && item.deleted) return null; // Không render nếu bị xóa và không yêu cầu hiển thị
+    if (!showDeleted && item?.deleted) return null; // Không render nếu bị xóa và không yêu cầu hiển thị
 
-    const isEditing = editingPath === item.path;
+    const isEditing = editingPath === item?.path;
 
     return (
       <div
-        key={item.path}
-        className={`${selectedPath === item.path ? 'font-semibold border-1 border-blue-700 bg-blue-200' : 'text-gray-800'} group flex items-center gap-0.5 px-1 py-0.5 relative transition-transform duration-200 hover:scale-105 ${selectedPath === item.path ? '' : 'hover:bg-gray-100'}`}
+        key={item?.path}
+        className={`${selectedPath === item?.path ? 'font-semibold border-1 border-blue-700 bg-blue-200' : 'text-gray-800'} group flex items-center gap-0.5 px-1 py-0.5 relative transition-transform duration-200 hover:scale-105 ${selectedPath === item?.path ? '' : 'hover:bg-gray-100'}`}
         onContextMenu={(e) =>
-          handleContextMenu(e, item.path, item.isFile, item.deleted, item.icon)
+          handleContextMenu(
+            e,
+            item?.path,
+            item?.isFile,
+            item?.deleted,
+            item?.icon
+          )
         }
         onClick={() => {
-          if (!item.isFile) {
+          if (!item?.isFile) {
             // setIsExpanded(!isExpanded);
-            onToggleFolder(item.path);
+            onToggleFolder(item?.path);
           }
           onSelectItem(item);
         }}
       >
         {/* Nút mở rộng/thu gọn cho thư mục */}
-        {!item.isFile && (
+        {!item?.isFile && (
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -126,14 +132,14 @@ export function TreeNavigation({
 
         {/* Icon của mục */}
         <i
-          className={`bi ${item.icon} mr-0 transition-transform duration-200 group-hover:scale-110 text-xs`}
+          className={`bi ${item?.icon} mr-0 transition-transform duration-200 group-hover:scale-110 text-xs`}
         />
 
         {/* Tên mục */}
-        {isEditing && editingPath === item.path ? (
+        {isEditing && editingPath === item?.path ? (
           <form
             className="flex-1"
-            onSubmit={(e) => handleRenameSubmit(e, item.path)}
+            onSubmit={(e) => handleRenameSubmit(e, item?.path)}
           >
             <input
               type="text"
@@ -149,7 +155,7 @@ export function TreeNavigation({
           </form>
         ) : (
           <span className={`flex-1 text-xs px-1 py-0.5 rounded`}>
-            {item.name}
+            {item?.name}
           </span>
         )}
       </div>
@@ -159,7 +165,7 @@ export function TreeNavigation({
   // Render children (đệ quy)
   const renderChildren = () => {
     if (!isExpanded) return null;
-    const children = Object.values(folder.children || {}).filter((child) =>
+    const children = Object.values(folder?.children || {}).filter((child) =>
       showDeleted ? child.deleted : !child.deleted
     );
 
@@ -167,7 +173,7 @@ export function TreeNavigation({
       <>
         {children.map((child) => (
           <TreeNavigation
-            key={child.path}
+            key={child?.path}
             folder={child}
             selectedPath={selectedPath}
             onToggleFolder={onToggleFolder}
@@ -183,21 +189,21 @@ export function TreeNavigation({
         ))}
 
         {/* Hiển thị item tạm thời */}
-        {tempItem?.path === folder.path && (
-          <div className="flex items-center px-2 py-1">
+        {tempItem?.path === folder?.path && (
+          <div className="flex items-center px-2 ">
             <i
-              className={`bi ${tempItem.type === 'folder' ? 'bi-folder' : 'bi-file-earmark-text'} mr-2 transition-transform duration-200 group-hover:scale-110 text-xs`}
+              className={`bi ${tempItem?.type === 'folder' ? 'bi-folder' : 'bi-file-earmark-text'} mr-2 transition-transform duration-200 group-hover:scale-110 text-xs`}
             />
             <input
               type="text"
               value={tempName}
               onChange={(e) => setTempName(e.target.value)}
-              placeholder={`Enter ${tempItem.type === 'folder' ? 'folder' : 'document'} name`}
+              placeholder={`Enter ${tempItem?.type === 'folder' ? 'folder' : 'document'} name`}
               autoFocus
               onBlur={() => setTempItem(null)} // Xóa item tạm thời nếu mất focus
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && tempName.trim()) {
-                  if (tempItem.type === 'folder') {
+                  if (tempItem?.type === 'folder') {
                     onAddFolder(folder.path, tempName.trim());
                   } else {
                     onAddDocument(folder.path, tempName.trim());

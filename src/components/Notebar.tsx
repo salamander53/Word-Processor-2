@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { ResizableBox } from 'react-resizable';
 interface NotebarProps {
@@ -11,10 +11,15 @@ export const Notebar = ({ isOpen, currentFolder, onChange }: NotebarProps) => {
   const [view, setView] = useState<string>('note');
   const [isSummaryOpen, setIsSummaryOpen] = useState(true);
   const [isNotesOpen, setIsNotesOpen] = useState(true);
-  const [summary, setSummary] = React.useState(currentFolder?.summary || '');
-  const [note, setNote] = React.useState(currentFolder?.note || '');
+  const [summary, setSummary] = React.useState('');
+  const [note, setNote] = React.useState('');
   const toggleSummary = () => setIsSummaryOpen(!isSummaryOpen);
   const toggleNotes = () => setIsNotesOpen(!isNotesOpen);
+
+  useEffect(() => {
+    setNote(currentFolder?.note);
+    setSummary(currentFolder?.summary);
+  }, [currentFolder]);
 
   const handleSummaryChange = (
     event: React.ChangeEvent<HTMLTextAreaElement>
@@ -87,7 +92,7 @@ export const Notebar = ({ isOpen, currentFolder, onChange }: NotebarProps) => {
                   className="border p-2"
                 >
                   <textarea
-                    className="w-100 h-100 border-0 font-thin text-sm"
+                    className="w-100 h-100 border-0 text-sm"
                     style={{
                       resize: 'none', // Tắt resize mặc định của textarea
                       overflow: 'auto',
@@ -95,7 +100,7 @@ export const Notebar = ({ isOpen, currentFolder, onChange }: NotebarProps) => {
                     }}
                     placeholder={'Type summary here...'}
                     onChange={handleSummaryChange}
-                    value={currentFolder?.summary}
+                    value={currentFolder?.summary || ''}
                   />
                 </ResizableBox>
               )}
@@ -121,7 +126,7 @@ export const Notebar = ({ isOpen, currentFolder, onChange }: NotebarProps) => {
                   className="border p-2"
                 >
                   <textarea
-                    className="w-100 h-100 border-0 font-thin text-sm"
+                    className="w-100 h-100 border-0 text-sm"
                     style={{
                       resize: 'none',
                       overflow: 'auto',
@@ -129,7 +134,7 @@ export const Notebar = ({ isOpen, currentFolder, onChange }: NotebarProps) => {
                     }}
                     placeholder={'Type note here...'}
                     onChange={handleNoteChange} // Gọi hàm khi thay đổi nội dung
-                    value={currentFolder?.note}
+                    value={currentFolder?.note || ''}
                   />
                 </ResizableBox>
               )}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useReducer } from 'react';
 import { useLocation } from 'react-router-dom';
 import { TreeNavigation } from '../components/TreeNavigation';
 import { Editor } from '../components/Editor';
@@ -31,7 +31,6 @@ export function ProjectPage() {
   const [showCoarkBoard, setShowCoarkBoard] = useState<any>();
   const [viewMode, setViewMode] = useState<'editor' | 'corkboard'>('editor');
   const [isNoteBarOpen, setIsNoteBarOpen] = useState(false);
-  const [textContent, setTextContent] = useState<string>('');
 
   // const [currentFolderPath, setCurrentFolderPath] =
   //   useState<string>('/john_doe/my_docs');
@@ -55,10 +54,12 @@ export function ProjectPage() {
       if (hasUnsavedChanges) {
         handleSave();
       }
-    }, 2000);
+    }, 5000);
     return () => clearInterval(interval);
   }, [
-    currentFolder?.content || currentFolder?.summary || currentFolder?.note,
+    currentFolder?.content,
+    currentFolder?.summary,
+    currentFolder?.note,
     hasUnsavedChanges,
   ]);
 
@@ -78,12 +79,10 @@ export function ProjectPage() {
     selectedNotePath: string,
     isDoubleClick: boolean
   ) => {
-    if (!isDoubleClick) {
-      setcurrentFolder(findItemByPath(folders, selectedNotePath));
-    } else {
-      setSelectedPath(selectedNotePath);
+    if (isDoubleClick) {
       setShowCoarkBoard(false);
     }
+    setcurrentFolder(findItemByPath(folders, selectedNotePath));
   };
   const handleSelectItem = async (item: FolderType) => {
     if (hasUnsavedChanges) {
@@ -292,21 +291,28 @@ export function ProjectPage() {
     }
     console.log(path);
   };
+
   const handleNoteSummaryChange = (summary: string, note: string) => {
     // Cập nhật currentFolder với summary và note mới
+    // const updatedFolder = {
+    //   ...currentFolder,
+    //   summary: summary,
+    //   note: note,
+    // };
+    // setcurrentFolder(updatedFolder);
     const updatedFolder = {
       ...currentFolder,
       summary,
       note,
     };
-
     setcurrentFolder(updatedFolder);
-    setHasUnsavedChanges(true);
 
+    setHasUnsavedChanges(true);
     // Lưu vào localStorage nếu cần
-    if (updatedFolder) {
-      localStorage.setItem(updatedFolder.path, JSON.stringify(updatedFolder));
-    }
+    localStorage.setItem(
+      currentFolder?.path as string,
+      JSON.stringify({ ...currentFolder, summary, note })
+    );
   };
 
   return (
@@ -365,7 +371,7 @@ export function ProjectPage() {
             isNoteBarOpen ? 'mr-[200px]' : 'mr-0'
           }`}
         >
-          {selectedPath && !showDeleted && !showCoarkBoard ? (
+          {!showDeleted && !showCoarkBoard ? (
             <Editor
               currentFolder={currentFolder}
               onChange={handleFolderChange}
@@ -429,8 +435,9 @@ export function ProjectPage() {
           ) : showCoarkBoard ? (
             <Corkboard
               items={findItemByPath(folders, selectedPath)?.children}
-              onSelect={handleSelectNote}
+              onSelectNote={handleSelectNote}
               // currentFolder={currentFolder}
+              onSelectItem={handleSelectItem}
             />
           ) : (
             <div className="text-center mt-20">Select a document to edit</div>

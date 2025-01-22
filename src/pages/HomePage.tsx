@@ -5,6 +5,7 @@ import AxiosInstance from '../components/AxiosInstance';
 import { toast } from 'react-toastify';
 import { Sidebar } from '../components/Sidebar';
 import GridLayout from 'react-grid-layout';
+import { TreeNavigation } from '../components/TreeNavigation';
 
 export function HomePage() {
   const navigate = useNavigate();
@@ -16,6 +17,7 @@ export function HomePage() {
     { id: 'updates', title: 'Recent Updates', x: 8, y: 3, w: 4, h: 7 },
     { id: 'featured', title: 'Featured Projects', x: 0, y: 0, w: 12, h: 6 },
   ]);
+  const [hoveredItem, setHoveredItem] = useState<string | null>(null);
 
   const sidebarWidth = sidebarCollapsed ? 64 : 200;
 
@@ -72,16 +74,39 @@ export function HomePage() {
       </div>
     );
   }
+  const findSpecificFile = (folder) => {
+    if (!folder.children) return ''; // Nếu không có con, trả về chuỗi rỗng.
+
+    // Lấy danh sách các con là file.
+    const files = Object.values(folder.children).filter(
+      (child) => child?.isFile
+    );
+
+    // Tìm tài liệu có tên "Readme".
+    const readmeFile = files.find(
+      (file) => file?.name.toLowerCase() === 'readme'
+    );
+
+    // Nếu có "Readme", trả về nó.
+    if (readmeFile) {
+      return readmeFile.content || '';
+    }
+
+    // Nếu không có "Readme", trả về file đầu tiên.
+    if (files.length > 0) {
+      return files[0].content || '';
+    }
+
+    // Nếu không có file nào, trả về chuỗi rỗng.
+    return '';
+  };
 
   const renderSection = (section: Section) => {
     switch (section.id) {
       case 'projects':
         return (
-          <div className="overflow-x-auto">
-            <div
-              className="flex gap-4 pb-4"
-              style={{ minWidth: 'max-content' }}
-            >
+          <div className="overflow-x-auto" style={{ minWidth: 'max-content' }}>
+            <div className="flex gap-4 ">
               {folders.map((folder) => (
                 <div
                   key={folder.path}
@@ -90,7 +115,17 @@ export function HomePage() {
                       state: { nameFolder: folder.name },
                     })
                   }
-                  className="w-44 h-60 bg-white rounded-lg border border-gray-200 hover:border-gray-300 transition-all hover:shadow-md p-4 cursor-pointer flex flex-col"
+                  onMouseEnter={() => setHoveredItem(folder.path)}
+                  onMouseLeave={() => setHoveredItem(null)}
+                  className="w-48 bg-white border border-gray-200 duration-300 relative cursor-pointer transition-all hover:border-gray-300  hover:shadow-md hover:z-10  "
+                  style={{
+                    minHeight: '250px',
+                    maxHeight: '250px',
+                    overflow: 'hidden',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    position: 'relative', // Quan trọng để z-index hoạt động
+                  }}
                 >
                   {/* <div className="flex items-center justify-between mb-2">
                     <i
@@ -103,17 +138,20 @@ export function HomePage() {
                   </div>
                   <h3 className="font-medium truncate">{folder.name}</h3> */}
                   {/* Card Header */}
-                  <div className="flex justify-start">
-                    <i className={`bi ${folder.icon}`} />
-                    <h3 className="ms-2 font-medium text-sm mb-2 truncate">
-                      {folder.name}
-                    </h3>
-                    {/* <ChevronRight className="w-4 h-4 text-gray-400" /> */}
+                  <div
+                    className={`d-flex align-items-center border-b-2 bg-gray-50 px-2 transition-all duration-300 ${
+                      hoveredItem === folder.path
+                        ? 'opacity-0 h-0'
+                        : 'opacity-100 h-auto'
+                    }`}
+                  >
+                    <i className={`bi ${folder.icon} px-2`} />
+                    <h3 className=" text-xs truncate">{folder.name}</h3>
                   </div>
 
                   {/* Card Content */}
-                  <div>
-                    {folder.isFile && folder.content && (
+                  <div className="overflow-y-auto">
+                    {/* {folder.isFile && folder.content && (
                       <p className="text-gray-500 font-thin text-sm">
                         {folder.content.substring(0, 300)}...
                       </p>
@@ -124,17 +162,27 @@ export function HomePage() {
                           {Object.keys(folder.children || {}).length} items
                         </span>
                       </div>
-                    )}
+                    )} */}
+                    <div
+                      className="text-wrap px-2"
+                      dangerouslySetInnerHTML={{
+                        __html: findSpecificFile(folder), // Lấy 500 ký tự đầu tiên
+                      }}
+                    ></div>
+                    <hr></hr>
+                    <div className="" style={{}}>
+                      <TreeNavigation folder={folder} />
+                    </div>
                   </div>
 
                   {/* Card Footer */}
-                  <div className="mt-2 text-gray-500 text-xs">
+                  {/* <div className="mt-2 text-gray-500 text-xs">
                     <div className="flex items-center justify-between">
                       <span>{folder.isFile ? 'Document' : 'Folder'}</span>
                       <span>•</span>
                       <span>Modified 2h ago</span>
                     </div>
-                  </div>
+                  </div> */}
                 </div>
               ))}
               <button
