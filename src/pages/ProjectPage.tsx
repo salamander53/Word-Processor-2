@@ -12,6 +12,7 @@ import { Notebar } from '../components/Notebar';
 import { useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
 import { compressDelta } from '../utils/compression';
+import { TrashComponent } from '../components/Trash';
 
 export function ProjectPage() {
   const owner = useSelector(
@@ -319,11 +320,13 @@ export function ProjectPage() {
     );
   };
 
+  // ProjectPage.jsx
   return (
     <div
       className="flex flex-col h-screen bg-gray-50"
       style={{ backgroundColor: theme.background }}
     >
+      {/* Header */}
       <Header
         onNewFolder={() => handleAddFolder(selectedPath || `/${owner}`)}
         onNewDocument={() => handleAddDocument(selectedPath || `/${owner}`)}
@@ -337,13 +340,14 @@ export function ProjectPage() {
         folders={folders}
         findItemByPath={findItemByPath}
       />
-      <div className="flex flex-1 overflow-hidden" onMouseMove={resizeSidebar}>
+
+      {/* Main Content */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Navigator */}
         <aside
-          className=" bg-gray-50 border-r overflow-auto relative"
+          className="bg-gray-50 border-r overflow-auto relative"
           style={{ width: sidebarWidth, backgroundColor: theme.sidebar }}
         >
-          {/* <ThemeCustomizer theme={theme} onChange={setTheme} /> */}
-
           {folders && (
             <TreeNavigation
               folder={folders}
@@ -370,6 +374,8 @@ export function ProjectPage() {
             }}
           />
         </aside>
+
+        {/* Editor */}
         <main
           className={`flex-1 bg-white transition-[margin-right] duration-300 ${
             isNoteBarOpen ? 'mr-[200px]' : 'mr-0'
@@ -384,63 +390,15 @@ export function ProjectPage() {
               theme={theme}
             />
           ) : showDeleted ? (
-            <div className="p-4">
-              <div className="p-4 ">
-                <h2 className="text-lg font-semibold mb-4">Trash</h2>
-                {folders ? (
-                  <ul
-                    className="space-y-2 overflow-y-auto"
-                    style={{ maxHeight: '500px' }}
-                  >
-                    {getDeletedItems(folders).map((item) => (
-                      <li
-                        key={item.path}
-                        className="flex items-center justify-between bg-gray-100 p-2 rounded-md hover:shadow"
-                      >
-                        <div className="flex items-center gap-4 p-2 rounded-lg bg-gray-100 hover:bg-gray-200">
-                          <i
-                            className={`${
-                              item.icon ||
-                              (item.isFile
-                                ? 'bi-file-earmark-text'
-                                : 'bi-folder')
-                            } text-gray-500`}
-                          />
-                          <div className="flex flex-col">
-                            <span className="font-semibold text-black">
-                              {item.name}
-                            </span>
-                            <span className="text-sm text-gray-600">
-                              {getPathAsString(item.path)}
-                            </span>
-                          </div>
-                        </div>
-                        <button
-                          className="text-red-600 hover:underline"
-                          onClick={() => handleDelete(item.path)}
-                        >
-                          Delete
-                        </button>
-
-                        <button
-                          className="text-green-600 hover:underline"
-                          onClick={() => handleRestore(item.path)}
-                        >
-                          Restore
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <div className="text-gray-500">Trash is empty</div>
-                )}
-              </div>
-            </div>
+            <TrashComponent
+              folders={folders}
+              handleDelete={handleDelete}
+              handleRestore={handleRestore}
+            />
           ) : showCoarkBoard ? (
             <Corkboard
               items={findItemByPath(folders, selectedPath)?.children}
               onSelectNote={handleSelectNote}
-              // currentFolder={currentFolder}
               onSelectItem={handleSelectItem}
             />
           ) : (
@@ -448,6 +406,7 @@ export function ProjectPage() {
           )}
         </main>
 
+        {/* Notebar */}
         <Notebar
           isOpen={isNoteBarOpen}
           currentFolder={currentFolder}
