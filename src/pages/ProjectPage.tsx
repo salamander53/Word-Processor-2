@@ -10,7 +10,7 @@ import { toast } from 'react-toastify';
 import { Corkboard } from '../components/Corkboard';
 import { Notebar } from '../components/Notebar';
 
-const owner = 'john_doe';
+// const owner = 'john_doe';
 export function ProjectPage() {
   const location = useLocation();
   const { nameFolder } = location.state || {};
@@ -40,9 +40,7 @@ export function ProjectPage() {
   }, [folders]);
   const loadFolders = async () => {
     try {
-      const response = await AxiosInstance.get(
-        `folders/${nameFolder}/${owner}`
-      );
+      const response = await AxiosInstance.get(`folders/${nameFolder}/`);
       setFolders(response.data);
     } catch (error) {
       // toast.error('Failed to load folders.');

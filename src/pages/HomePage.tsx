@@ -21,7 +21,7 @@ export function HomePage() {
 
   const sidebarWidth = sidebarCollapsed ? 64 : 200;
 
-  const owner = 'john_doe'; // Giả sử owner là john_doe
+  // const owner = 'john_doe'; // Giả sử owner là john_doe
 
   useEffect(() => {
     loadFolders();
@@ -30,7 +30,7 @@ export function HomePage() {
   // Tải danh sách folder
   const loadFolders = async () => {
     try {
-      const response = await AxiosInstance.get(`folders/tree/${owner}`);
+      const response = await AxiosInstance.get(`folders/tree/`);
 
       // Extract docs and trash
       console.log(response);
@@ -40,7 +40,7 @@ export function HomePage() {
       setFolders(extractedFolders);
     } catch (err) {
       // console.error('Error loading folders:', error);
-      toast.error(`${err}`);
+      // toast.error(`${err}`);
     } finally {
       setLoading(false);
     }
@@ -58,8 +58,8 @@ export function HomePage() {
           isFile: false,
         });
         const newFolder = response.data;
-
-        setFolders((prev) => [...prev, newFolder]); // Cập nhật danh sách folder
+        loadFolders();
+        // setFolders((prev) => [...prev, newFolder]); // Cập nhật danh sách folder
       } catch (error) {
         console.error('Error creating folder:', error);
         alert('Failed to create folder. Please try again.');

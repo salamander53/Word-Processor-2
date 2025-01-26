@@ -1,5 +1,8 @@
 import axios from 'axios';
+import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
+import store, { RootState } from '../redux/store';
+import { clearAuth } from '../redux/authSlice';
 
 const baseUrl = 'http://127.0.0.1:3000/';
 
@@ -13,25 +16,29 @@ const AxiosInstance = axios.create({
 });
 
 AxiosInstance.interceptors.request.use((config) => {
-  //   const token = localStorage.getItem("Token");
-  //   if (token) {
-  //     config.headers.Authorization = `Token ${token}`;
-  //   } else {
-  //     config.headers.Authorization = ``;
-  //   }
+  const token = localStorage.getItem('Token');
+  // console.log("token: ", token);
+  // const token = useSelector((state: RootState) => state.auth.token);
+  if (token) {
+    config.headers.authorization = `Bearer ${token}`;
+  } else {
+    config.headers.authorization = ``;
+  }
   return config;
 });
 
-// AxiosInstance.interceptors.response.use(
-//   (response) => {
-//     return response;
-//   },
-//   (error) => {
-//     if (error.response && error.response.status === 401) {
-//       localStorage.removeItem("Token");
-//       window.location.href = "/";
-//     }
-//   }
-// );
+AxiosInstance.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  (error) => {
+    // const dispatch = useDispatch();
+    if (error.response && error.response.status === 401) {
+      // localStorage.removeItem('Token');
+      // store.dispatch(clearAuth());
+      // window.location.href = '/';
+    }
+  }
+);
 
 export default AxiosInstance;
