@@ -9,9 +9,14 @@ import AxiosInstance from '../components/AxiosInstance';
 import { toast } from 'react-toastify';
 import { Corkboard } from '../components/Corkboard';
 import { Notebar } from '../components/Notebar';
+import { useSelector } from 'react-redux';
+import { RootState } from '../redux/store';
+import { compressDelta } from '../utils/compression';
 
-// const owner = 'john_doe';
 export function ProjectPage() {
+  const owner = useSelector(
+    (state: RootState) => state.auth.tokenPayload.username
+  );
   const location = useLocation();
   const { nameFolder } = location.state || {};
   const [folders, setFolders] = useState<FolderType | null>(null);
@@ -31,6 +36,7 @@ export function ProjectPage() {
   const [showCoarkBoard, setShowCoarkBoard] = useState<any>();
   const [viewMode, setViewMode] = useState<'editor' | 'corkboard'>('editor');
   const [isNoteBarOpen, setIsNoteBarOpen] = useState(false);
+  const [baseContent, setBaseContent] = useState('');
 
   // const [currentFolderPath, setCurrentFolderPath] =
   //   useState<string>('/john_doe/my_docs');

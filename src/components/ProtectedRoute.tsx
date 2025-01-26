@@ -9,7 +9,11 @@ const ProtectedRoute = () => {
   // const state = store.getState();
   // console.log('Updated state:', state);
   const token = useSelector((state: RootState) => state.auth.token);
-  console.log('Token from Redux:', token);
+  // // console.log('Token from Redux:', token);
+  // const tokenPayload = useSelector(
+  //   (state: RootState) => state.auth.tokenPayload
+  // );
+  // console.log('Token from Redux:', tokenPayload);
 
   return token ? <Outlet /> : <Navigate to="/" />;
 };

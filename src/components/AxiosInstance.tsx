@@ -1,11 +1,10 @@
 import axios from 'axios';
-import { useDispatch, useSelector } from 'react-redux';
-import { toast } from 'react-toastify';
-import store, { RootState } from '../redux/store';
-import { clearAuth } from '../redux/authSlice';
+import store from '../redux/store'; // Import store từ Redux
+import { clearAuth } from '../redux/authSlice'; // Import action để xóa auth
 
 const baseUrl = 'http://127.0.0.1:3000/';
 
+// Tạo Axios instance
 const AxiosInstance = axios.create({
   baseURL: baseUrl,
   timeout: 5000,
@@ -15,29 +14,29 @@ const AxiosInstance = axios.create({
   },
 });
 
+// Interceptor để thêm token vào header trước khi gửi request
 AxiosInstance.interceptors.request.use((config) => {
-  const token = localStorage.getItem('Token');
-  // console.log("token: ", token);
-  // const token = useSelector((state: RootState) => state.auth.token);
+  const token = store.getState().auth.token; // Lấy token từ Redux store
   if (token) {
-    config.headers.authorization = `Bearer ${token}`;
+    config.headers.authorization = `Bearer ${token}`; // Thêm token vào header
   } else {
-    config.headers.authorization = ``;
+    delete config.headers.authorization; // Xóa authorization header nếu không có token
   }
   return config;
 });
 
+// Interceptor để xử lý response
 AxiosInstance.interceptors.response.use(
   (response) => {
-    return response;
+    return response; // Trả về response nếu không có lỗi
   },
   (error) => {
-    // const dispatch = useDispatch();
     if (error.response && error.response.status === 401) {
-      // localStorage.removeItem('Token');
-      // store.dispatch(clearAuth());
-      // window.location.href = '/';
+      // Xử lý lỗi 401 (Unauthorized)
+      store.dispatch(clearAuth()); // Xóa thông tin auth khỏi Redux store
+      window.location.href = '/'; // Chuyển hướng về trang đăng nhập
     }
+    return Promise.reject(error); // Trả về lỗi để xử lý tiếp
   }
 );
 

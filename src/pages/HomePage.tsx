@@ -6,6 +6,8 @@ import { toast } from 'react-toastify';
 import { Sidebar } from '../components/Sidebar';
 import GridLayout from 'react-grid-layout';
 import { TreeNavigation } from '../components/TreeNavigation';
+import { useSelector } from 'react-redux';
+import { RootState } from '../redux/store';
 
 export function HomePage() {
   const navigate = useNavigate();
@@ -21,8 +23,9 @@ export function HomePage() {
 
   const sidebarWidth = sidebarCollapsed ? 64 : 200;
 
-  // const owner = 'john_doe'; // Giả sử owner là john_doe
-
+  const owner = useSelector(
+    (state: RootState) => state.auth.tokenPayload.username
+  ); // Giả sử owner là john_doe
   useEffect(() => {
     loadFolders();
   }, []);
@@ -33,7 +36,7 @@ export function HomePage() {
       const response = await AxiosInstance.get(`folders/tree/`);
 
       // Extract docs and trash
-      console.log(response);
+      // console.log(response);
       const foldersData = response.data.children; // Assuming docs and trash are at index 8 in the response array
       const extractedFolders = Object.values(foldersData);
 

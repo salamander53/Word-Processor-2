@@ -3,40 +3,46 @@ import AxiosInstance from '../components/AxiosInstance';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import store from '../redux/store';
-import { setToken } from '../redux/authSlice';
+import { setToken, setTokenPayload } from '../redux/authSlice';
 import { useSelector } from 'react-redux';
 
 function Login() {
   const navigate = useNavigate();
-  const handleSubmit = (event: any) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const username = event.target.username.value;
-    const password = event.target.password.value;
-    // console.log('Email:', email, 'Password:', password);
-    // Thêm logic xử lý đăng nhập tại đây
-    AxiosInstance.post(`auth/login`, {
-      username: username,
-      password: password,
-    })
-      .then((response) => {
-        console.log(response);
-        // localStorage.setItem('Token', response.data);
-        store.dispatch(setToken({ token: response.data.token }));
-        if (response.data) {
-          navigate(`/home`);
-        } else {
-          toast.error('Login failed!');
-        }
-      })
-      .catch((error) => {
-        console.error('Error during login', error);
-        toast.error('Error during login');
-      })
-      .finally(() => {
-        // Ẩn toast "Loading..." khi nhận được response hoặc khi gặp lỗi
-        // toast.dismiss(loadingToastId);
-        // setLoading(false);
+
+    // Lấy giá trị từ form
+    const username = event.currentTarget.username.value;
+    const password = event.currentTarget.password.value;
+    // console.log(username, password);
+
+    try {
+      // Gọi API đăng nhập
+      const response = await AxiosInstance.post('auth/login', {
+        username: username,
+        password: password,
       });
+
+      // Kiểm tra nếu response có dữ liệu
+      if (response.data) {
+        console.log('Login response:', response.data);
+
+        // Lưu token và tokenPayload vào Redux store
+        store.dispatch(setToken({ token: response.data.token }));
+        store.dispatch(
+          setTokenPayload({ tokenPayload: response.data.tokenPayload })
+        );
+
+        // Chuyển hướng đến trang home
+        navigate('/home');
+      } else {
+        console.error('No data received from the server');
+        toast.error('No data received from the server');
+      }
+    } catch (error) {
+      console.error('Error during login:', error);
+      toast.error('Error during login');
+    }
   };
 
   return (
