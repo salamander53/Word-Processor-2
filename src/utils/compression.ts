@@ -1,30 +1,20 @@
-import { diff_match_patch } from 'diff-match-patch';
 import pako from 'pako';
 
-const dmp = new diff_match_patch();
-
-// Tính toán delta và nén
-export const compressDelta = (
-  oldContent: string,
-  newContent: string
-): Uint8Array => {
-  const patches = dmp.patch_make(oldContent, newContent);
-  const patchText = dmp.patch_toText(patches);
-  return pako.gzip(patchText); // Nén bằng gzip
+/**
+ * Nén HTML thành Uint8Array (binary)
+ */
+export const compressHTML = (html: string): Uint8Array => {
+  return pako.gzip(html);
 };
 
-// Giải nén và áp dụng delta
-export const decompressDelta = (
-  oldContent: string,
-  compressedDelta: Uint8Array
-): string => {
+/**
+ * Giải nén Uint8Array thành HTML
+ */
+export const decompressHTML = (compressed: Uint8Array): string => {
   try {
-    const patchText = pako.ungzip(compressedDelta, { to: 'string' });
-    const patches = dmp.patch_fromText(patchText);
-    const [newContent] = dmp.patch_apply(patches, oldContent);
-    return newContent as string;
+    return pako.ungzip(compressed, { to: 'string' });
   } catch (error) {
-    console.error('Decompression failed:', error);
-    return oldContent; // Fallback về content cũ nếu lỗi
+    console.error('Failed to decompress HTML:', error);
+    return ''; // Fallback nếu giải nén thất bại
   }
 };

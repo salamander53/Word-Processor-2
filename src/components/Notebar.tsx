@@ -1,13 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { ResizableBox } from 'react-resizable';
+import AxiosInstance from './AxiosInstance';
+import { decompressHTML } from '../utils/compression';
 interface NotebarProps {
   isOpen: boolean;
   currentFolder: any;
   onChange: (summary: string, note: string) => void;
+  saveRevision: (title: string) => any;
+  deleteRevision: (_id: string) => any;
+  rollbackRevision: (content: string) => void;
 }
 
-export const Notebar = ({ isOpen, currentFolder, onChange }: NotebarProps) => {
+export const Notebar = ({
+  isOpen,
+  currentFolder,
+  onChange,
+  saveRevision,
+  deleteRevision,
+  rollbackRevision,
+}: NotebarProps) => {
   const [view, setView] = useState<string>('note');
   const [isSummaryOpen, setIsSummaryOpen] = useState(true);
   const [isNotesOpen, setIsNotesOpen] = useState(true);
@@ -15,6 +27,15 @@ export const Notebar = ({ isOpen, currentFolder, onChange }: NotebarProps) => {
   const [note, setNote] = React.useState('');
   const toggleSummary = () => setIsSummaryOpen(!isSummaryOpen);
   const toggleNotes = () => setIsNotesOpen(!isNotesOpen);
+  const [revisions, setRevisions] = useState([]);
+  const [currentRevision, setCurrentRevision] = useState<any>();
+  const [newRevision, setNewRevision] = useState<{
+    title: string;
+    isEditing: boolean;
+  }>({
+    title: '',
+    isEditing: false,
+  });
 
   useEffect(() => {
     setNote(currentFolder?.note);
@@ -34,7 +55,30 @@ export const Notebar = ({ isOpen, currentFolder, onChange }: NotebarProps) => {
     setNote(newNote);
     onChange(summary, newNote); // Gửi giá trị mới về ProjectPage
   };
-  // console.log(currentFolder);
+
+  const loadRevision = async () => {
+    try {
+      const res = await AxiosInstance.get(`revisions/`, {
+        params: { path: currentFolder?.path },
+      });
+
+      // Sắp xếp revisions theo thứ tự mới nhất lên đầu
+      const sortedRevisions = res.data.sort((a, b) => {
+        return new Date(b._id).getTime() - new Date(a._id).getTime(); // Sắp xếp theo _id (ObjectId)
+        // Hoặc nếu có trường createdAt:
+        // return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      });
+
+      setRevisions(sortedRevisions); // Cập nhật state với dữ liệu đã sắp xếp
+    } catch (error) {
+      console.error('Error loading revisions:', error);
+    }
+  };
+
+  useEffect(() => {
+    loadRevision();
+  }, [currentFolder]);
+  // console.log(currentRevision);
   return (
     <div
       className={`fixed right-0 bg-gray-50 border-l shadow-lg transition-transform duration-300 ${
@@ -155,10 +199,32 @@ export const Notebar = ({ isOpen, currentFolder, onChange }: NotebarProps) => {
           <div className="flex items-center gap-2 mb-2 justify-between">
             <span className="text-xs text-gray-600">Snapshots</span>
             <div>
-              <button className=" hover:bg-gray-100 rounded-full">
+              <button
+                className="hover:bg-gray-100 rounded-full"
+                onClick={() => {
+                  setNewRevision({ title: '', isEditing: true }); // Hiển thị hàng nhập tiêu đề
+                }}
+              >
                 <i className="bi bi-plus text-gray-600" />
               </button>
-              <button className=" hover:bg-gray-100 rounded-full">
+              <button
+                className="hover:bg-gray-100 rounded-full"
+                onClick={async () => {
+                  try {
+                    if (!currentRevision?._id) {
+                      alert('Please select a revision to delete');
+                      return;
+                    }
+
+                    await deleteRevision(currentRevision._id); // Xóa revision
+                    await loadRevision(); // Tải lại danh sách revisions
+                    setCurrentRevision(null); // Reset current revision sau khi xóa
+                  } catch (error) {
+                    console.error('Error deleting/loading revisions:', error);
+                    alert('Failed to delete revision');
+                  }
+                }}
+              >
                 <i className="bi bi-dash text-gray-600" />
               </button>
             </div>
@@ -175,48 +241,130 @@ export const Notebar = ({ isOpen, currentFolder, onChange }: NotebarProps) => {
               </button>
             </div>
 
-            <button className="btn btn-sm shadow gap-2  text-xs text-gray-700 hover:bg-gray-100 rounded-md">
+            <button
+              className="btn btn-sm shadow gap-2  text-xs text-gray-700 hover:bg-gray-100 rounded-md"
+              onClick={() => {
+                rollbackRevision(currentRevision?.content);
+              }}
+            >
               <i className="text-gray-600 bi bi-history w-4 h-4" />
               Roll Back
             </button>
           </div>
 
           {/* Table */}
-          <div className="mb-6">
-            <table className="table">
-              <thead>
-                <tr className="border-b bg-gray-50">
-                  <th className=" py-2 text-left text-xs font-medium text-gray-600">
-                    Date
-                  </th>
-                  <th className=" py-2 text-left text-xs font-medium text-gray-600">
-                    Title
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr className="border-b">
-                  <td className=" py-2 text-xs text-gray-600">
-                    Jul 4, 2022 at 14:04
-                  </td>
-                  <td className=" py-2 text-xs text-gray-900">First draft</td>
-                </tr>
-              </tbody>
-            </table>
+          <div className="">
+            {/* Table Container */}
+            <div className="max-h-36 overflow-y-auto">
+              {/* Table */}
+              <table className="table table-striped w-full">
+                {/* Fixed Header */}
+                <thead className="sticky top-0 table-secondary">
+                  <tr>
+                    <th className="py-2 text-left text-xs font-medium text-gray-600">
+                      Date
+                    </th>
+                    <th className="py-2 text-left text-xs font-medium text-gray-600">
+                      Title
+                    </th>
+                  </tr>
+                </thead>
+                {/* Scrollable Body */}
+                <tbody>
+                  {/* Hàng nhập tiêu đề mới */}
+                  {newRevision.isEditing && (
+                    <tr>
+                      <td className="py-2 text-xs text-gray-600">
+                        {new Date().toLocaleString()}{' '}
+                        {/* Hiển thị thời gian hiện tại */}
+                      </td>
+                      <td className="py-2 text-xs text-gray-900">
+                        <input
+                          type="text"
+                          className="w-full border p-1 text-xs"
+                          placeholder="Enter revision title..."
+                          value={newRevision.title}
+                          onChange={(e) =>
+                            setNewRevision({
+                              ...newRevision,
+                              title: e.target.value,
+                            })
+                          }
+                          onKeyDown={async (e) => {
+                            if (e.key === 'Enter') {
+                              saveRevision(newRevision.title); // Lưu khi nhấn Enter
+                              setNewRevision({ title: '', isEditing: false });
+                              await loadRevision();
+                            }
+                          }}
+                        />
+                        {newRevision.isEditing && (
+                          <button
+                            className="ml-2 p-1 text-xs bg-blue-500 text-white rounded"
+                            onClick={() => saveRevision(newRevision.title)}
+                          >
+                            Save
+                          </button>
+                        )}
+                        {newRevision.isEditing && (
+                          <button
+                            className="ml-2 p-1 text-xs bg-gray-500 text-white rounded"
+                            onClick={() =>
+                              setNewRevision({ title: '', isEditing: false })
+                            }
+                          >
+                            Cancel
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  )}
+
+                  {/* Các hàng revisions hiện có */}
+                  {revisions.map((revision) => (
+                    <tr
+                      key={revision._id}
+                      onClick={() => {
+                        const decompressedContent = decompressHTML(
+                          new Uint8Array(revision.content.data)
+                        );
+                        setCurrentRevision({
+                          ...revision,
+                          content: decompressedContent,
+                        });
+                      }}
+                      className={`cursor-pointer hover:bg-gray-100 ${
+                        currentRevision?._id === revision?._id
+                          ? 'border-2 border-blue-300'
+                          : ''
+                      }`}
+                    >
+                      <td className="py-2 text-xs text-gray-600">
+                        {new Date(revision._id).toLocaleString()}
+                      </td>
+                      <td className="py-2 text-xs text-gray-900">
+                        {revision.title}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
 
           {/* Text Area */}
-          <div className="prose max-w-none">
+          <div className="prose max-w-none max-h-96 overflow-y-auto">
             <p className="text-gray-700 text-xs leading-relaxed">
-              Alexey Fyodorovitch Karamazov was the third son of Fyodor
-              Pavlovitch Karamazov, a land owner well known in our district in
-              his own day, and still years ago, and which I shall speak of in
-              its proper place. For the present I will only say that this
-              "landowner"—for so we used to call him, although he hardly spent a
-              day of his life on his own estate—was a strange type, yet one
-              pretty frequently to be met with, a type abject and vicious and at
-              the same time senseless. But he was one of those senseless persons
-              who are very well capable...
+              {currentRevision?.content ? (
+                <div
+                  className=""
+                  dangerouslySetInnerHTML={{
+                    __html: currentRevision.content,
+                  }}
+                />
+              ) : (
+                'None'
+              )}
             </p>
           </div>
         </div>

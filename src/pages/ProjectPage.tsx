@@ -11,7 +11,7 @@ import { Corkboard } from '../components/Corkboard';
 import { Notebar } from '../components/Notebar';
 import { useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
-import { compressDelta } from '../utils/compression';
+import { compressHTML } from '../utils/compression';
 import { TrashComponent } from '../components/Trash';
 
 export function ProjectPage() {
@@ -320,6 +320,33 @@ export function ProjectPage() {
     );
   };
 
+  const saveRevision = async (title: string) => {
+    try {
+      const compressed = compressHTML(currentFolder?.content);
+
+      const res = await AxiosInstance.post(`revisions/`, {
+        content: Array.from(compressed),
+        author: owner,
+        title: title || currentFolder?.name, // Sử dụng tiêu đề mới hoặc tên thư mục nếu không có
+        path: currentFolder?.path,
+      });
+
+      // console.log(res);
+      // setNewRevision({ title: '', isEditing: false }); // Reset trạng thái sau khi lưu
+      // await loadRevision(); // Tải lại danh sách revisions
+    } catch (err) {
+      console.error('Error saving revision:', err);
+    }
+  };
+  const deleteRevision = (_id: string) => {
+    AxiosInstance.delete(`revisions/${_id}`)
+      .then((res) => console.log(res))
+      .catch((err) => console.log(err));
+  };
+  const rollbackRevision = async (content: string) => {
+    setcurrentFolder({ ...currentFolder, content: content });
+  };
+
   // ProjectPage.jsx
   return (
     <div
@@ -381,7 +408,7 @@ export function ProjectPage() {
             isNoteBarOpen ? 'mr-[200px]' : 'mr-0'
           }`}
         >
-          {!showDeleted && !showCoarkBoard ? (
+          {!showDeleted && !showCoarkBoard && currentFolder ? (
             <Editor
               currentFolder={currentFolder}
               onChange={handleFolderChange}
@@ -411,6 +438,9 @@ export function ProjectPage() {
           isOpen={isNoteBarOpen}
           currentFolder={currentFolder}
           onChange={handleNoteSummaryChange}
+          saveRevision={saveRevision}
+          deleteRevision={deleteRevision}
+          rollbackRevision={rollbackRevision}
         />
       </div>
     </div>

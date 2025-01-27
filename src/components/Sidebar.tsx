@@ -60,45 +60,34 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   ];
 
   return (
+    // Sidebar component
     <div
-      className="fixed top-0 left-0 h-full bg-white border-r flex flex-col transition-all duration-200 z-50"
+      className="h-full bg-white border-r flex flex-col transition-all duration-200 relative"
       style={{ width: collapsed ? minWidth : width }}
     >
-      {/* User Profile */}
-      <div className="p-4 border-b">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white shrink-0">
-            <User className="w-6 h-6" />
-          </div>
-          {!collapsed && (
-            <div
-              className="overflow-hidden transition-opacity duration-200"
-              style={{ opacity: textOpacity }}
-            >
-              <h3 className="font-medium truncate">John Doe</h3>
-              <p className="text-sm text-gray-500 truncate">john@example.com</p>
-            </div>
-          )}
+      {/* User Profile Section */}
+      <div className="p-4 border-b flex items-center gap-3">
+        <div className="avatar-placeholder shrink-0">
+          <User className="w-6 h-6" />
         </div>
+        {!collapsed && (
+          <div className="flex-1 min-w-0">
+            <h3 className="truncate font-medium">John Doe</h3>
+            <p className="truncate text-sm text-gray-500">john@example.com</p>
+          </div>
+        )}
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 py-4 overflow-y-auto">
+      {/* Navigation Items */}
+      <nav className="flex-1 overflow-y-auto py-4">
         {navItems.map((item) => (
           <a
             key={item.label}
             href={item.href}
-            className="flex items-center gap-3 px-4 py-2 text-gray-700 hover:bg-gray-100"
+            className="flex items-center gap-3 px-4 py-2 hover:bg-gray-100 text-gray-700"
           >
             <item.icon className="w-5 h-5 shrink-0" />
-            {!collapsed && (
-              <span
-                className="transition-opacity duration-200 whitespace-nowrap"
-                style={{ opacity: textOpacity }}
-              >
-                {item.label}
-              </span>
-            )}
+            {!collapsed && <span className="truncate">{item.label}</span>}
           </a>
         ))}
       </nav>
@@ -106,12 +95,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
       {/* Collapse Button */}
       <button
         onClick={onToggle}
-        className="fixed left-[calc(100%-12px)] top-1/2 transform -translate-y-1/2 w-6 h-6 bg-white border rounded-full shadow-sm flex items-center justify-center z-50"
-        style={{
-          left: collapsed
-            ? `calc(${minWidth}px - 12px)`
-            : `calc(${width}px - 12px)`,
-        }}
+        className="absolute -right-3 top-1/2 bg-white border rounded-full w-6 h-6 shadow-sm flex items-center justify-center transform -translate-y-1/2 z-50"
       >
         {collapsed ? (
           <ChevronRight className="w-4 h-4" />

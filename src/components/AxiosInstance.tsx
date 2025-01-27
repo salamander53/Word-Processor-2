@@ -22,6 +22,12 @@ AxiosInstance.interceptors.request.use((config) => {
   } else {
     delete config.headers.authorization; // Xóa authorization header nếu không có token
   }
+  if (config.data?.compressedContent) {
+    config.data.compressedContent = new Uint8Array(
+      config.data.compressedContent
+    );
+    config.headers['Content-Encoding'] = 'gzip';
+  }
   return config;
 });
 

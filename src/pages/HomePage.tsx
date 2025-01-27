@@ -13,11 +13,11 @@ export function HomePage() {
   const navigate = useNavigate();
   const [folders, setFolders] = useState([]); // Danh sách folder
   const [loading, setLoading] = useState(true);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [sections, setSections] = useState([
     { id: 'projects', title: 'My Folder', x: 0, y: 3, w: 8, h: 7 },
     { id: 'updates', title: 'Recent Updates', x: 8, y: 3, w: 4, h: 7 },
-    { id: 'featured', title: 'Featured Projects', x: 0, y: 0, w: 12, h: 6 },
+    { id: 'featured', title: 'Featured Projects', x: 0, y: 0, w: 12, h: 8 },
   ]);
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
 
@@ -108,11 +108,17 @@ export function HomePage() {
     switch (section.id) {
       case 'projects':
         return (
-          <div className="overflow-x-auto" style={{ minWidth: 'max-content' }}>
-            <div className="flex gap-4 ">
+          <div className="container-fluid px-0">
+            <div className="d-flex flex-nowrap overflow-x-auto pb-3">
               {folders.map((folder) => (
                 <div
                   key={folder.path}
+                  className="card hover-shadow m-2 flex-shrink-0"
+                  style={{
+                    width: '240px',
+                    maxHeight: '280px',
+                    transition: 'transform 0.2s, box-shadow 0.2s',
+                  }}
                   onClick={() =>
                     navigate(`/folder/${folder.name}`, {
                       state: { nameFolder: folder.name },
@@ -120,97 +126,68 @@ export function HomePage() {
                   }
                   onMouseEnter={() => setHoveredItem(folder.path)}
                   onMouseLeave={() => setHoveredItem(null)}
-                  className="w-48 bg-white border border-gray-200 duration-300 relative cursor-pointer transition-all hover:border-gray-300  hover:shadow-md hover:z-10  "
-                  style={{
-                    minHeight: '250px',
-                    maxHeight: '250px',
-                    overflow: 'hidden',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    position: 'relative', // Quan trọng để z-index hoạt động
-                  }}
                 >
-                  {/* <div className="flex items-center justify-between mb-2">
-                    <i
-                      className={`bi ${folder.icon} mr-0 transition-transform duration-200 group-hover:scale-110 text-xs`}
-                    />
-
-                    <span className="text-xs text-gray-500">
-                      {new Date(folder.updatedAt).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <h3 className="font-medium truncate">{folder.name}</h3> */}
-                  {/* Card Header */}
-                  <div
-                    className={`d-flex align-items-center border-b-2 bg-gray-50 px-2 transition-all duration-300 ${
-                      hoveredItem === folder.path
-                        ? 'opacity-0 h-0'
-                        : 'opacity-100 h-auto'
-                    }`}
-                  >
-                    <i className={`bi ${folder.icon} px-2`} />
-                    <h3 className=" text-xs truncate">{folder.name}</h3>
+                  <div className="card-header bg-light d-flex align-items-center py-2">
+                    <i className={`bi ${folder.icon} me-2`} />
+                    <h6 className="mb-0 text-truncate">{folder.name}</h6>
                   </div>
 
-                  {/* Card Content */}
-                  <div className="overflow-y-auto">
-                    {/* {folder.isFile && folder.content && (
-                      <p className="text-gray-500 font-thin text-sm">
-                        {folder.content.substring(0, 300)}...
-                      </p>
-                    )}
-                    {!folder.isFile && (
-                      <div className="text-gray-500">
-                        <span>
-                          {Object.keys(folder.children || {}).length} items
-                        </span>
-                      </div>
-                    )} */}
+                  <div className="card-body overflow-auto p-2">
                     <div
-                      className="text-wrap px-2"
+                      className="small text-muted"
                       dangerouslySetInnerHTML={{
-                        __html: findSpecificFile(folder), // Lấy 500 ký tự đầu tiên
+                        __html: findSpecificFile(folder),
                       }}
-                    ></div>
-                    <hr></hr>
-                    <div className="" style={{}}>
-                      <TreeNavigation folder={folder} />
-                    </div>
+                    />
+                    <hr className="my-2" />
+                    <TreeNavigation folder={folder} />
                   </div>
 
-                  {/* Card Footer */}
-                  {/* <div className="mt-2 text-gray-500 text-xs">
-                    <div className="flex items-center justify-between">
-                      <span>{folder.isFile ? 'Document' : 'Folder'}</span>
-                      <span>•</span>
-                      <span>Modified 2h ago</span>
+                  {hoveredItem === folder.path && (
+                    <div className="card-footer bg-transparent border-0 py-1">
+                      <small className="text-muted">
+                        Last modified: 2h ago
+                      </small>
                     </div>
-                  </div> */}
+                  )}
                 </div>
               ))}
-              <button
-                onClick={handleCreateFolder}
-                className="w-44 h-60 bg-white rounded-lg border-2 border-dashed border-gray-300 hover:border-gray-400 transition-colors flex flex-col items-center justify-center gap-2 p-4"
-              >
-                <i className="bi bi-folder-plus w-6 h-6 text-gray-400" />
-                <span className="text-sm text-gray-600">New Folder</span>
-              </button>
+
+              <div className="m-2 d-flex align-items-center">
+                <button
+                  onClick={handleCreateFolder}
+                  className="w-44 h-64 bg-white rounded-lg border-2 border-dashed border-gray-300 hover:border-gray-400 transition-colors flex flex-col items-center justify-center gap-2 p-4"
+                  style={{ width: '200px' }}
+                >
+                  <i className="bi bi-folder-plus fs-4 mb-2" />
+                  <span className="small">New Project</span>
+                </button>
+              </div>
             </div>
           </div>
         );
+
       case 'updates':
         return (
-          <div className="bg-white rounded-lg border border-gray-200">
+          <div className="list-group list-group-flush rounded-2">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="px-4 py-2 border-b last:border-b-0">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm">
-                    <span className="font-medium">Update {i}:</span>
-                    {' New features and improvements'}
+              <div
+                key={i}
+                className="list-group-item d-flex align-items-start py-3 hover-bg-light"
+              >
+                <div className="badge bg-primary-subtle text-primary me-3 p-2">
+                  <i className="bi bi-megaphone fs-5" />
+                </div>
+                <div className="flex-grow-1">
+                  <div className="d-flex justify-content-between align-items-center mb-1">
+                    <h6 className="mb-0 fw-medium">Update {i}</h6>
+                    <span className="text-muted small">
+                      {new Date().toLocaleDateString()}
+                    </span>
+                  </div>
+                  <p className="small text-muted mb-0">
+                    New features and improvements to enhance your workflow
                   </p>
-                  <span className="text-xs text-gray-500">
-                    {new Date().toLocaleDateString()}
-                  </span>
                 </div>
               </div>
             ))}
@@ -218,26 +195,30 @@ export function HomePage() {
         );
       case 'featured':
         return (
-          <div className="overflow-x-auto">
-            <div
-              className="flex gap-4 pb-4"
-              style={{ minWidth: 'max-content' }}
-            >
-              {[1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className="w-64 bg-white rounded-lg border border-gray-200 p-4"
-                >
-                  <div className="aspect-video bg-gray-100 rounded mb-2" />
-                  <h3 className="font-medium text-sm mb-1">
-                    Featured Project {i}
-                  </h3>
-                  <p className="text-xs text-gray-500">
-                    A showcase of what's possible
-                  </p>
+          <div className="row g-4 row-cols-xxl-3 row-cols-md-2 row-cols-1">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="col">
+                <div className="card h-100 border-0 shadow-hover">
+                  <div className="ratio ratio-16x9 bg-light-subtle">
+                    <div className="d-flex align-items-center justify-content-center">
+                      <i className="bi bi-stack text-primary opacity-75 fs-1" />
+                    </div>
+                  </div>
+                  <div className="card-body">
+                    <h5 className="card-title mb-2">Featured Project {i}</h5>
+                    <p className="card-text small text-muted mb-0">
+                      Explore this innovative solution showcasing advanced
+                      capabilities
+                    </p>
+                  </div>
+                  <div className="card-footer bg-transparent border-top">
+                    <button className="btn btn-sm btn-outline-primary">
+                      View Details
+                    </button>
+                  </div>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
         );
       default:
@@ -259,149 +240,19 @@ export function HomePage() {
 
   // console.log(folders);
   return (
-    // <div className="min-h-screen bg-gray-50">
-    //   <header className="bg-white border-b px-6 py-4">
-    //     <div className="max-w-4xl mx-auto flex justify-between items-center">
-    //       <h1 className="text-2xl font-semibold">My Folders</h1>
-    //       <button
-    //         onClick={handleCreateFolder}
-    //         className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-    //       >
-    //         {/* <Plus className="w-4 h-4" /> */}
-    //         <i className="bi bi-journal-plus w-4 h-4"></i>
-    //         New Folder
-    //       </button>
-    //     </div>
-    //   </header>
-    //   <main className="max-w-4xl mx-auto py-8 px-4">
-    //     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-    //       {folders.map((folder) => (
-    //         <div
-    //           key={folder.path}
-    //           onClick={() =>
-    //             navigate(`/folder/${folder.name}`, {
-    //               state: { nameFolder: folder.name },
-    //             })
-    //           }
-    //           className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow cursor-pointer"
-    //         >
-    //           <div className="flex items-center gap-3 mb-3">
-    //             {/* <Folder className="w-6 h-6 text-blue-500" /> */}
-    //             <i className="bi bi-folder w-4 h-4"></i>
-    //             <h2 className="text-lg font-medium">{folder.name}</h2>
-    //           </div>
-    //           <p className="text-sm text-gray-500">Path: {folder.path}</p>
-    //         </div>
-    //       ))}
-    //     </div>
-    //   </main>
-    // </div>
-    <div className="min-h-screen bg-gray-50 flex">
+    <div
+      className="min-h-screen bg-gray-50 grid"
+      style={{
+        gridTemplateColumns: `${sidebarCollapsed ? '64px' : '200px'} 1fr`,
+        transition: 'grid-template-columns 0.3s ease',
+      }}
+    >
       <Sidebar
         collapsed={sidebarCollapsed}
         onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
       />
 
-      <div
-        className="flex-1 ml-[64px]"
-        style={{ marginLeft: sidebarCollapsed ? '64px' : `${sidebarWidth}px` }}
-      >
-        {/* <header className=" px-6 py-3">
-          <div className="max-w-6xl mx-auto">
-            <h1 className="text-2xl font-semibold">Hello</h1>
-          </div>
-        </header> */}
-
-        {/* <main className="max-w-6xl mx-auto py-8 px-4 space-y-6">
-          {sections
-            .sort((a, b) => a.order - b.order)
-            .map((section) => (
-              <section
-                key={section.id}
-                data-id={section.id}
-                className="bg-white rounded-lg shadow-sm "
-                style={{ height: section.height }}
-              >
-                <div className="p-4 border-b flex items-center justify-between">
-                  <h2 className="text-lg font-semibold flex items-center gap-2">
-                    <i
-                      className="bi bi-grip-vertical w-4 h-4 cursor-move text-gray-400"
-                      onMouseDown={(e) => {
-                        // Kích hoạt logic kéo để sắp xếp lại
-                        const draggedId = section.id;
-                        let targetId: string | null = null;
-
-                        const handleDragOver = (event: MouseEvent) => {
-                          const target = event.target as HTMLElement;
-                          const sectionElem = target.closest('section');
-                          if (
-                            sectionElem &&
-                            sectionElem.getAttribute('data-id')
-                          ) {
-                            targetId = sectionElem.getAttribute('data-id');
-                          }
-                        };
-
-                        const handleMouseUp = () => {
-                          if (draggedId && targetId && draggedId !== targetId) {
-                            handleSectionReorder(draggedId, targetId);
-                          }
-                          document.removeEventListener(
-                            'mousemove',
-                            handleDragOver
-                          );
-                          document.removeEventListener(
-                            'mouseup',
-                            handleMouseUp
-                          );
-                        };
-
-                        document.addEventListener('mousemove', handleDragOver);
-                        document.addEventListener('mouseup', handleMouseUp);
-                      }}
-                    />
-                    {section.title}
-                  </h2>
-                  <div className="flex items-center gap-2">
-                    <div
-                      className="w-4 h-4 cursor-ns-resize"
-                      onMouseDown={(e) => {
-                        const startY = e.pageY;
-                        const startHeight = section.height;
-
-                        const handleMouseMove = (e: MouseEvent) => {
-                          const delta = e.pageY - startY;
-                          handleSectionResize(section.id, startHeight + delta);
-                        };
-
-                        const handleMouseUp = () => {
-                          document.removeEventListener(
-                            'mousemove',
-                            handleMouseMove
-                          );
-                          document.removeEventListener(
-                            'mouseup',
-                            handleMouseUp
-                          );
-                        };
-
-                        document.addEventListener('mousemove', handleMouseMove);
-                        document.addEventListener('mouseup', handleMouseUp);
-                      }}
-                    >
-                      <i class="bi bi-arrows-vertical"></i>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  className="p-4 overflow-auto"
-                  style={{ height: 'calc(100% - 60px)', overflowY: 'auto' }}
-                >
-                  {renderSection(section)}
-                </div>
-              </section>
-            ))}
-        </main> */}
+      <div className="p-6 overflow-hidden">
         <GridLayout
           className="layout"
           layout={sections.map((section) => ({
@@ -418,6 +269,11 @@ export function HomePage() {
           isResizable
           isDraggable
           draggableHandle=".drag-handle"
+          containerPadding={[16, 16]}
+          // style={{
+          //   width: '100%',
+          //   height: 'calc(100vh - 48px)', // Adjust based on your needs
+          // }}
         >
           {sections
             .sort((a, b) => a.order - b.order)
@@ -425,18 +281,15 @@ export function HomePage() {
               <section
                 key={section.id}
                 data-id={section.id}
-                className="bg-white rounded-lg shadow-sm "
+                className="bg-white rounded-3 shadow-sm d-flex flex-column" // Thêm flex-column
               >
-                <div className="p-4 border-b flex items-center justify-between">
-                  <h2 className="text-md font-semibold flex items-center gap-2">
-                    <i className="bi bi-grip-vertical w-4 h-4 cursor-move text-gray-400 drag-handle" />
+                <div className="p-3 border-bottom bg-light rounded-top">
+                  <h2 className="mb-0 fs-5 fw-semibold d-flex align-items-center gap-2">
+                    <i className="bi bi-grip-vertical fs-6 text-muted drag-handle" />
                     {section.title}
                   </h2>
                 </div>
-                <div
-                  className="p-4 overflow-auto"
-                  // style={{ height: 'calc(100% - 60px)', overflowY: 'auto' }}
-                >
+                <div className="flex-grow-1 overflow-hidden p-3">
                   {renderSection(section)}
                 </div>
               </section>
