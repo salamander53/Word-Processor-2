@@ -39,21 +39,23 @@ export function ProjectPage() {
   const [isNoteBarOpen, setIsNoteBarOpen] = useState(false);
   const [baseContent, setBaseContent] = useState('');
 
-  // const [currentFolderPath, setCurrentFolderPath] =
-  //   useState<string>('/john_doe/my_docs');
-  // console.log(folders);
   useEffect(() => {
     loadFolders();
-  }, [folders]);
+  }, [nameFolder]);
   const loadFolders = async () => {
     try {
       const response = await AxiosInstance.get(`folders/${nameFolder}/`);
       setFolders(response.data);
+
+      // Cập nhật lại currentFolder nếu đang được chọn
+      if (currentFolder?.path) {
+        const updatedFolder = findItemByPath(response.data, currentFolder.path);
+        setcurrentFolder(updatedFolder || currentFolder);
+      }
     } catch (error) {
-      // toast.error('Failed to load folders.');
+      toast.error('Failed to load folders.');
     }
   };
-
   useEffect(() => {
     const interval = setInterval(() => {
       if (hasUnsavedChanges) {
@@ -68,18 +70,6 @@ export function ProjectPage() {
     hasUnsavedChanges,
   ]);
 
-  // useEffect(() => {
-  //   const handleKeyDown = (e: KeyboardEvent) => {
-  //     if (e.ctrlKey && e.key === 's') {
-  //       e.preventDefault();
-  //       handleSave();
-  //     }
-  //   };
-  //   window.addEventListener('keydown', handleKeyDown);
-  //   return () => {
-  //     window.removeEventListener('keydown', handleKeyDown);
-  //   };
-  // }, [selectedPath, currentFolder?.content, hasUnsavedChanges]);
   const handleSelectNote = async (
     selectedNotePath: string,
     isDoubleClick: boolean
@@ -109,7 +99,9 @@ export function ProjectPage() {
   };
 
   const handleFolderChange = (content: string) => {
-    if (currentFolder?.content !== content) {
+    // Sử dụng currentContent với giá trị mặc định là ""
+    const currentContent = currentFolder?.content || '';
+    if (currentContent !== content) {
       setcurrentFolder({ ...currentFolder, content });
       setHasUnsavedChanges(true);
       localStorage.setItem(
@@ -125,12 +117,14 @@ export function ProjectPage() {
     try {
       await AxiosInstance.post(`folders/update`, {
         path: currentFolder.path,
-        newContent: currentFolder.content || '',
+        newContent: currentFolder.content || '', // Gửi cả giá trị rỗng
+        // ... các trường khác
         newSummary: currentFolder.summary || '',
         newNote: currentFolder.note || '',
       });
       setHasUnsavedChanges(false);
       localStorage.removeItem(currentFolder.path as string);
+      await loadFolders(); // Load lại dữ liệu từ server
     } catch (error) {
       toast.error('Failed to save document.');
     }
@@ -298,13 +292,6 @@ export function ProjectPage() {
   };
 
   const handleNoteSummaryChange = (summary: string, note: string) => {
-    // Cập nhật currentFolder với summary và note mới
-    // const updatedFolder = {
-    //   ...currentFolder,
-    //   summary: summary,
-    //   note: note,
-    // };
-    // setcurrentFolder(updatedFolder);
     const updatedFolder = {
       ...currentFolder,
       summary,
@@ -345,6 +332,7 @@ export function ProjectPage() {
   };
   const rollbackRevision = async (content: string) => {
     setcurrentFolder({ ...currentFolder, content: content });
+    setHasUnsavedChanges(true);
   };
 
   // ProjectPage.jsx
@@ -427,6 +415,7 @@ export function ProjectPage() {
               items={findItemByPath(folders, selectedPath)?.children}
               onSelectNote={handleSelectNote}
               onSelectItem={handleSelectItem}
+              currentFolder={currentFolder}
             />
           ) : (
             <div className="text-center mt-20">Select a document to edit</div>

@@ -100,7 +100,7 @@ export function Editor({
                 }
             `,
         }}
-        value={currentFolder?.content}
+        value={currentFolder?.content || ''}
         onEditorChange={onChange}
       />
     </div>

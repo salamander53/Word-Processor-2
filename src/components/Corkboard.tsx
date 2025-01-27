@@ -6,12 +6,14 @@ interface CorkboardProps {
   items: Record<string, FolderType>;
   onSelectNote: (selectedNotePath: string, isDoubleClick: boolean) => void;
   onSelectItem: (item: FolderType) => void;
+  currentFolder: FolderType;
 }
 
 export function Corkboard({
   items,
   onSelectNote,
   onSelectItem,
+  currentFolder,
 }: CorkboardProps) {
   const [selectedNote, setSelectedNote] = useState<string>();
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
@@ -97,7 +99,9 @@ export function Corkboard({
                       <p className={`text-xs text-dark`}>
                         <label className="text-gray-300"># Summary</label>
                         <br />
-                        {item.summary}
+                        {currentFolder?.path === item.path
+                          ? currentFolder.summary // Hiển thị summary từ currentFolder
+                          : item.summary}
                       </p>
                     ))}
                   {!item.isFile && (
