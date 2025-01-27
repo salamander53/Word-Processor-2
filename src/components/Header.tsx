@@ -8,13 +8,15 @@ interface HeaderProps {
   onNewDocument: () => void;
   currentFolder: any;
   onToggleTrash: () => void;
-  showTrash: boolean;
+  // showTrash: boolean;
   toggleNotebar: () => void;
-  showCoarkBoard: boolean;
+  // showCoarkBoard: boolean;
   onSelectItem: (item: FolderType) => void;
   selectedPath: string | null;
   folders: FolderType;
   findItemByPath: (root: FolderType, path: string) => FolderType;
+  viewMode: 'editor' | 'corkboard' | 'trash' | 'document';
+  setViewMode: (view: string) => void;
 }
 
 export function Header({
@@ -22,13 +24,15 @@ export function Header({
   onNewDocument,
   currentFolder,
   onToggleTrash,
-  showTrash,
+  // showTrash,
   toggleNotebar,
-  showCoarkBoard,
+  // showCoarkBoard,
   onSelectItem,
   selectedPath,
   folders,
   findItemByPath,
+  viewMode,
+  setViewMode,
 }: HeaderProps) {
   const [viewSearchBar, setViewSearchBar] = useState<string>('normal');
   const getPathAsString = (path: string): string => {
@@ -134,7 +138,7 @@ export function Header({
           <div className="flex items-center gap-1 px-1 ">
             <button
               onClick={onToggleTrash}
-              className={`p-1.5  ${showTrash ? 'bg-gray-300' : 'hover:bg-gray-100'}`}
+              className={`p-1.5  ${viewMode === 'trash' ? 'bg-gray-300' : 'hover:bg-gray-100'}`}
             >
               <i className="bi bi-trash w-4 h-4 text-red-600" />
             </button>
@@ -175,21 +179,27 @@ export function Header({
             )}
           </div>
           <button
-            className={`p-1.5 ${showCoarkBoard ? 'bg-gray-300' : 'hover:bg-gray-100'} `}
+            className={`p-1.5 ${viewMode === 'corkboard' ? 'bg-gray-300' : 'hover:bg-gray-100'} `}
             onClick={
-              showCoarkBoard
+              viewMode === 'corkboard'
                 ? undefined
                 : () =>
                     onSelectItem(
                       findItemByPath(folders, currentFolder?.parentPath)
                     )
             }
-            disabled={showCoarkBoard}
+            disabled={viewMode === 'corkboard'}
           >
             <i className="bi bi-grid-3x3 w-4 h-4 text-gray-600" />
           </button>
 
-          <button className="p-1.5 hover:bg-gray-100 ">
+          <button
+            className={`p-1.5 ${viewMode === 'document' ? 'bg-gray-300' : 'hover:bg-gray-100'}`}
+            onClick={() =>
+              setViewMode(viewMode === 'document' ? 'editor' : 'document')
+            }
+            disabled={viewMode === 'document'}
+          >
             <i className="bi bi-justify w-4 h-4 text-gray-600" />
           </button>
         </div>

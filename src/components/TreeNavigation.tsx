@@ -16,8 +16,9 @@ interface TreeNavigationProps {
   onAddFolder: (parentPath: string) => void;
   onAddDocument: (parentPath: string) => void;
   onChangeIcon: (path: string, icon: string) => void;
-  showDeleted?: boolean; // Hiển thị các mục bị xóa nếu true
+  // showDeleted?: boolean; // Hiển thị các mục bị xóa nếu true
   onDelete: (path: string) => void;
+  viewMode: 'editor' | 'corkboard' | 'trash' | 'document';
 }
 
 interface ContextMenuState {
@@ -43,8 +44,9 @@ export function TreeNavigation({
   onAddFolder,
   onAddDocument,
   onChangeIcon,
-  showDeleted = false,
+  // showDeleted = false,
   onDelete,
+  viewMode,
 }: TreeNavigationProps) {
   //   const isExpanded = expandedFolders.has(folder?.path);
   const [isExpanded, setIsExpanded] = useState(true);
@@ -90,7 +92,7 @@ export function TreeNavigation({
   };
   // Render một mục (folder/file)
   const renderItem = (item: FolderType) => {
-    if (!showDeleted && item?.deleted) return null; // Không render nếu bị xóa và không yêu cầu hiển thị
+    if (viewMode !== 'trash' && item?.deleted) return null; // Không render nếu bị xóa và không yêu cầu hiển thị
 
     const isEditing = editingPath === item?.path;
 
@@ -166,7 +168,7 @@ export function TreeNavigation({
   const renderChildren = () => {
     if (!isExpanded) return null;
     const children = Object.values(folder?.children || {}).filter((child) =>
-      showDeleted ? child.deleted : !child.deleted
+      viewMode === 'trash' ? child.deleted : !child.deleted
     );
 
     return (
@@ -183,7 +185,7 @@ export function TreeNavigation({
             onAddDocument={onAddDocument}
             onRemove={onRemove}
             onRestore={onRestore}
-            showDeleted={showDeleted}
+            viewMode={viewMode}
             onChangeIcon={onChangeIcon}
           />
         ))}

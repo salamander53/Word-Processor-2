@@ -1,84 +1,75 @@
 import React, { useState, useEffect } from 'react';
 import { FolderType } from '../types';
 import { Editor as TinyMCEEditor } from '@tinymce/tinymce-react';
-
 interface DocumentViewProps {
-  folders: FolderType | null;
-  onSelectItem: (item: FolderType) => void;
-  onChange: (path: string, content: string) => void;
+  items: Record<string, FolderType>;
+  currentFolder: FolderType;
+  onContentChange: (path: string, newContent: string) => void;
 }
 
+const getAllFiles = (folder: FolderType): FolderType[] => {
+  let files: FolderType[] = [];
+  if (folder.isFile) {
+    files.push(folder);
+  } else if (folder.children) {
+    Object.values(folder.children).forEach((child) => {
+      files = files.concat(getAllFiles(child));
+    });
+  }
+  return files;
+};
+
 export function DocumentView({
-  folders,
-  onSelectItem,
-  onChange,
+  items,
+  currentFolder,
+  onContentChange,
 }: DocumentViewProps) {
-  const [mergedContent, setMergedContent] = useState<string>('');
-  const [currentFile, setCurrentFile] = useState<FolderType | null>(null);
+  const [combinedContent, setCombinedContent] = useState<string>('');
 
-  // Hàm để hợp nhất nội dung của các file trong thư mục
-  const mergeFilesContent = (folder: FolderType) => {
-    let content = '';
-    if (folder.children) {
-      Object.values(folder.children).forEach((child) => {
-        if (child.isFile) {
-          content += `<h2>${child.name}</h2>${child.content || ''}<br/><br/>`;
-        }
-      });
-    }
-    return content;
-  };
+  // Lấy tất cả file và sắp xếp theo tên
+  const files = Object.values(items || {})
+    .flatMap((folder) => getAllFiles(folder))
+    .sort((a, b) => a.name.localeCompare(b.name));
 
-  // Khi folders thay đổi, cập nhật nội dung hợp nhất
+  // Kết hợp nội dung các file thành một chuỗi HTML
   useEffect(() => {
-    if (folders) {
-      const content = mergeFilesContent(folders);
-      setMergedContent(content);
-    }
-  }, [folders]);
+    const content = files
+      .map(
+        (file) => `
+          <div data-path="${file.path}">
+            <h3>${file.name}</h3>
+            <div>${file.content || ''}</div>
+          </div>
+          <div style="border: 1px dashed; width: 100%;height: 0px"></div>
+        `
+      )
+      .join('');
+    setCombinedContent(content);
+  }, [files]);
 
-  // Xử lý khi người dùng chỉnh sửa nội dung
+  // Xử lý thay đổi nội dung trong Editor
   const handleEditorChange = (content: string) => {
-    if (currentFile) {
-      // Cập nhật nội dung của file hiện tại
-      onChange(currentFile.path, content);
-    }
-  };
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(content, 'text/html');
+    const fileSections = doc.querySelectorAll('.file-section');
 
-  // Xác định file hiện tại dựa trên vị trí con trỏ
-  const handleCursorChange = (event: any) => {
-    const editor = event.editor;
-    const cursorPosition = editor.selection.getCursor();
-    const content = editor.getContent({ format: 'html' });
-
-    // Tìm file tương ứng với vị trí con trỏ
-    if (folders && folders.children) {
-      let accumulatedLength = 0;
-      for (const child of Object.values(folders.children)) {
-        if (child.isFile) {
-          const fileContent = `<h2>${child.name}</h2>${child.content || ''}<br/><br/>`;
-          const fileLength = fileContent.length;
-
-          if (
-            cursorPosition >= accumulatedLength &&
-            cursorPosition <= accumulatedLength + fileLength
-          ) {
-            setCurrentFile(child);
-            break;
-          }
-          accumulatedLength += fileLength;
-        }
+    fileSections.forEach((section) => {
+      const path = section.getAttribute('data-path');
+      const contentElement = section.querySelector('.file-content');
+      if (path && contentElement) {
+        const newContent = contentElement.innerHTML;
+        onContentChange(path, newContent); // Chỉ lưu nội dung trong .file-content
       }
-    }
+    });
   };
 
   return (
-    <div className="p-5 bg-white min-h-full overflow-y-auto">
+    <div className=" bg-white  overflow-y-auto h-full relative">
       <TinyMCEEditor
         apiKey="xc6hl4z7bo1bq9eq02dokdrqz3dlczy2d2a0p2jk2vztzsco"
         init={{
           height: '100%',
-          menubar: false,
+          menubar: true,
           plugins: [
             'advlist',
             'autolink',
@@ -106,16 +97,30 @@ export function DocumentView({
             'removeformat | help',
           content_style: `
             body {
-              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-              font-size: 16px;
-              color: #1f2937;
-              background-color: #ffffff;
+              background: #fff;
+            }
+
+            @media (min-width: 840px) {
+              html {
+                background: #eceef4;
+                min-height: 100%;
+                padding: 0 .5rem
+              }
+
+              body {
+                background-color: #fff;
+                box-shadow: 0 0 4px rgba(0, 0, 0, .15);
+                box-sizing: border-box;
+                margin: 1rem auto 0;
+                max-width: 820px;
+                min-height: calc(100vh - 1rem);
+                padding:2rem 3rem 3rem 3rem
+              }
             }
           `,
         }}
-        value={mergedContent}
+        value={combinedContent}
         onEditorChange={handleEditorChange}
-        onCursorChange={handleCursorChange}
       />
     </div>
   );

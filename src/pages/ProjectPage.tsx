@@ -13,6 +13,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
 import { compressHTML } from '../utils/compression';
 import { TrashComponent } from '../components/Trash';
+import { DocumentView } from '../components/DocumentView';
 
 export function ProjectPage() {
   const owner = useSelector(
@@ -24,7 +25,7 @@ export function ProjectPage() {
   const [selectedPath, setSelectedPath] = useState<string | boolean>(false);
   const [currentFolder, setcurrentFolder] = useState<FolderType>();
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [showDeleted, setShowDeleted] = useState(false);
+
   const [theme, setTheme] = useState<Theme>({
     primary: '#3b82f6',
     secondary: '#6b7280',
@@ -34,8 +35,10 @@ export function ProjectPage() {
   });
   const [sidebarWidth, setSidebarWidth] = useState(180);
   const [isResizing, setIsResizing] = useState(false);
-  const [showCoarkBoard, setShowCoarkBoard] = useState<any>();
-  const [viewMode, setViewMode] = useState<'editor' | 'corkboard'>('editor');
+
+  const [viewMode, setViewMode] = useState<
+    'editor' | 'corkboard' | 'trash' | 'document'
+  >('editor');
   const [isNoteBarOpen, setIsNoteBarOpen] = useState(false);
   const [baseContent, setBaseContent] = useState('');
 
@@ -74,17 +77,17 @@ export function ProjectPage() {
     selectedNotePath: string,
     isDoubleClick: boolean
   ) => {
-    if (isDoubleClick) {
-      setShowCoarkBoard(false);
-    }
     setcurrentFolder(findItemByPath(folders, selectedNotePath));
+    if (isDoubleClick) {
+      setViewMode('editor');
+    }
   };
   const handleSelectItem = async (item: FolderType) => {
     if (hasUnsavedChanges) {
       await handleSave();
     }
-    if (item.isFile) {
-      setShowCoarkBoard(false);
+    if (item?.isFile) {
+      setViewMode('editor');
       setSelectedPath(item.path);
       setcurrentFolder(item);
       localStorage.getItem(item.path)
@@ -92,7 +95,7 @@ export function ProjectPage() {
         : localStorage.setItem(item.path as string, item.content);
     } else {
       setSelectedPath(item.path);
-      setShowCoarkBoard(true);
+      setViewMode('corkboard');
       setcurrentFolder(item);
     }
     setHasUnsavedChanges(false);
@@ -335,30 +338,30 @@ export function ProjectPage() {
     setHasUnsavedChanges(true);
   };
 
-  // ProjectPage.jsx
   return (
     <div
       className="flex flex-col h-screen bg-gray-50"
       style={{ backgroundColor: theme.background }}
     >
-      {/* Header */}
       <Header
         onNewFolder={() => handleAddFolder(selectedPath || `/${owner}`)}
         onNewDocument={() => handleAddDocument(selectedPath || `/${owner}`)}
         currentFolder={currentFolder}
-        onToggleTrash={() => setShowDeleted(!showDeleted)}
-        showTrash={showDeleted}
+        onToggleTrash={() =>
+          setViewMode((prev) => (prev === 'trash' ? 'editor' : 'trash'))
+        }
+        // showTrash={showDeleted}
         toggleNotebar={() => setIsNoteBarOpen((prev) => !prev)}
-        showCoarkBoard={showCoarkBoard}
+        // showCoarkBoard={showCoarkBoard}
         onSelectItem={handleSelectItem}
         selectedPath={selectedPath}
         folders={folders}
         findItemByPath={findItemByPath}
+        viewMode={viewMode}
+        setViewMode={setViewMode}
       />
 
-      {/* Main Content */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Navigator */}
         <aside
           className="bg-gray-50 border-r overflow-auto relative"
           style={{ width: sidebarWidth, backgroundColor: theme.sidebar }}
@@ -374,9 +377,10 @@ export function ProjectPage() {
               onRestore={handleRestore}
               onAddFolder={handleAddFolder}
               onAddDocument={handleAddDocument}
-              showDeleted={showDeleted}
+              // showDeleted={showDeleted}
               onChangeIcon={handleChangeIcon}
               onDelete={handleDelete}
+              viewMode={viewMode}
             />
           )}
           <div
@@ -390,39 +394,60 @@ export function ProjectPage() {
           />
         </aside>
 
-        {/* Editor */}
         <main
-          className={`flex-1 bg-white transition-[margin-right] duration-300 ${
-            isNoteBarOpen ? 'mr-[200px]' : 'mr-0'
-          }`}
+          className={`flex-1 bg-white ${isNoteBarOpen ? 'mr-[200px]' : 'mr-0'}`}
         >
-          {!showDeleted && !showCoarkBoard && currentFolder ? (
-            <Editor
-              currentFolder={currentFolder}
-              onChange={handleFolderChange}
-              onSave={handleSave}
-              hasUnsavedChanges={hasUnsavedChanges}
-              theme={theme}
-            />
-          ) : showDeleted ? (
-            <TrashComponent
-              folders={folders}
-              handleDelete={handleDelete}
-              handleRestore={handleRestore}
-            />
-          ) : showCoarkBoard ? (
-            <Corkboard
-              items={findItemByPath(folders, selectedPath)?.children}
-              onSelectNote={handleSelectNote}
-              onSelectItem={handleSelectItem}
-              currentFolder={currentFolder}
-            />
+          {currentFolder ? (
+            <>
+              {viewMode === 'editor' && (
+                <Editor
+                  currentFolder={currentFolder}
+                  onChange={handleFolderChange}
+                  onSave={handleSave}
+                  hasUnsavedChanges={hasUnsavedChanges}
+                  theme={theme}
+                />
+              )}
+              {viewMode === 'trash' && (
+                <TrashComponent
+                  folders={folders}
+                  handleDelete={handleDelete}
+                  handleRestore={handleRestore}
+                />
+              )}
+              {viewMode === 'corkboard' && (
+                <Corkboard
+                  items={findItemByPath(folders, selectedPath)?.children}
+                  onSelectNote={handleSelectNote}
+                  onSelectItem={handleSelectItem}
+                  currentFolder={currentFolder}
+                />
+              )}
+
+              {viewMode === 'document' && (
+                <DocumentView
+                  items={findItemByPath(folders, selectedPath)?.children}
+                  currentFolder={currentFolder}
+                  onContentChange={(path, newContent) => {
+                    const targetFile = findItemByPath(folders, path);
+                    if (targetFile) {
+                      const updatedFile = {
+                        ...targetFile,
+                        content: newContent,
+                      };
+                      setcurrentFolder(updatedFile);
+                      setHasUnsavedChanges(true);
+                      localStorage.setItem(path, JSON.stringify(updatedFile));
+                    }
+                  }}
+                />
+              )}
+            </>
           ) : (
             <div className="text-center mt-20">Select a document to edit</div>
           )}
         </main>
 
-        {/* Notebar */}
         <Notebar
           isOpen={isNoteBarOpen}
           currentFolder={currentFolder}
