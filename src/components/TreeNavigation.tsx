@@ -1,25 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ContextMenu } from './ContextMenu';
 import { FolderType } from '../types';
-import { IconPicker } from './IconPicker';
-
-interface TreeNavigationProps {
-  folder: FolderType;
-  //   expandedFolders: Set<string>;
-  selectedPath: string | null;
-  onToggleFolder: (path: string) => void;
-  onSelectItem: (item: FolderType) => void;
-  //   onFolderSelect: (path: string) => void;
-  onRemove: (path: string, isFile: boolean) => void;
-  onRestore: (path: string) => void;
-  onRename: (path: string, newName: string) => void;
-  onAddFolder: (parentPath: string) => void;
-  onAddDocument: (parentPath: string) => void;
-  onChangeIcon: (path: string, icon: string) => void;
-  // showDeleted?: boolean; // Hiển thị các mục bị xóa nếu true
-  onDelete: (path: string) => void;
-  viewMode: 'editor' | 'corkboard' | 'trash' | 'document';
-}
+import * as Bi from 'react-icons/bi';
+import * as Fi from 'react-icons/fi';
+import * as Hi from 'react-icons/hi';
+import * as Ai from 'react-icons/ai';
+import * as Fa from 'react-icons/fa';
+import * as Md from 'react-icons/md';
 
 interface ContextMenuState {
   x: number;
@@ -31,24 +18,46 @@ interface ContextMenuState {
   deleted: boolean;
 }
 
+interface TreeNavigationProps {
+  folder: FolderType;
+  selectedPath: string | null;
+  onToggleFolder: (path: string) => void;
+  onSelectItem: (item: FolderType) => void;
+  onRemove: (path: string, isFile: boolean) => void;
+  onRestore: (path: string) => void;
+  onRename: (path: string, newName: string) => void;
+  onAddFolder: (parentPath: string, name: string) => void;
+  onAddDocument: (parentPath: string, name: string) => void;
+  onChangeIcon: (path: string, icon: string) => void;
+  onDelete: (path: string) => void;
+  viewMode: 'editor' | 'corkboard' | 'trash' | 'document';
+  level?: number;
+}
+
+const ICON_COMPONENTS: { [key: string]: any } = {
+  bi: Bi,
+  fi: Fi,
+  hi: Hi,
+  ai: Ai,
+  fa: Fa,
+  md: Md,
+};
+
 export function TreeNavigation({
   folder,
-  //   expandedFolders,
   selectedPath,
   onToggleFolder,
   onSelectItem,
-  //   onFolderSelect,
   onRemove,
   onRestore,
   onRename,
   onAddFolder,
   onAddDocument,
   onChangeIcon,
-  // showDeleted = false,
   onDelete,
   viewMode,
+  level = 0,
 }: TreeNavigationProps) {
-  //   const isExpanded = expandedFolders.has(folder?.path);
   const [isExpanded, setIsExpanded] = useState(true);
   const [editingPath, setEditingPath] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
@@ -58,15 +67,18 @@ export function TreeNavigation({
     type: 'folder' | 'document';
   } | null>(null);
   const [tempName, setTempName] = useState('');
+  const [localFolder, setLocalFolder] = useState(folder);
 
-  // Mở context menu
-  // Mở context menu
+  useEffect(() => {
+    setLocalFolder(folder);
+  }, [folder]);
+
   const handleContextMenu = (
     e: React.MouseEvent,
     path: string,
     isFile: boolean,
     deleted: boolean,
-    currentIcon?: string // Đặt tham số tùy chọn ở cuối
+    currentIcon?: string
   ) => {
     e.preventDefault();
     setContextMenu(null);
@@ -82,7 +94,16 @@ export function TreeNavigation({
     setTempName('');
   };
 
-  // Nộp tên chỉnh sửa
+  const handleIconChange = (iconName: string) => {
+    if (contextMenu) {
+      onChangeIcon(contextMenu.path, iconName);
+      setLocalFolder((prev) => ({
+        ...prev,
+        icon: iconName,
+      }));
+    }
+  };
+
   const handleRenameSubmit = (e: React.FormEvent, path: string) => {
     e.preventDefault();
     if (tempName.trim()) {
@@ -90,16 +111,67 @@ export function TreeNavigation({
     }
     setEditingPath(null);
   };
-  // Render một mục (folder/file)
+
+  const renderIcon = (iconName?: string) => {
+    if (!iconName || typeof iconName !== 'string') {
+      return null;
+    }
+
+    try {
+      const parts = iconName.split(' ');
+      if (parts.length < 2) return null;
+
+      const prefix = parts[0];
+      const name = parts[1].replace('bi-', ''); // Remove 'bi-' prefix if it exists
+      const set = prefix.split('-')[0]; // Get icon set (bi, fi, etc.)
+
+      if (!ICON_COMPONENTS[set]) {
+        // Fallback to using Bootstrap Icons class
+        return <i className={iconName} />;
+      }
+
+      // Convert kebab case to pascal case for React component name
+      const componentName = name
+        .split('-')
+        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+        .join('');
+
+      const IconComponent = ICON_COMPONENTS[set][componentName];
+      if (IconComponent) {
+        return <IconComponent className="w-4 h-4" />;
+      }
+
+      // Fallback to using Bootstrap Icons class if React component not found
+      return <i className={iconName} />;
+    } catch (error) {
+      console.error('Error rendering icon:', error);
+      // Fallback to using Bootstrap Icons class on error
+      return <i className={iconName} />;
+    }
+  };
+
   const renderItem = (item: FolderType) => {
-    if (viewMode !== 'trash' && item?.deleted) return null; // Không render nếu bị xóa và không yêu cầu hiển thị
+    if (viewMode !== 'trash' && item?.deleted) return null;
 
     const isEditing = editingPath === item?.path;
+    const isSelected = selectedPath === item?.path;
 
     return (
       <div
         key={item?.path}
-        className={`${selectedPath === item?.path ? 'font-semibold border-1 border-blue-700 bg-blue-200' : 'text-gray-800'} group flex items-center gap-0.5 px-1 py-0.5 relative transition-transform duration-200 hover:scale-105 ${selectedPath === item?.path ? '' : 'hover:bg-gray-100'}`}
+        className={`
+          group flex items-center gap-2 relative
+          min-h-[28px] 
+          transition-all duration-200 ease-in-out
+          hover:bg-gray-100/70 dark:hover:bg-gray-800/30
+          ${isSelected ? 'bg-blue-50/80 dark:bg-blue-900/20' : ''}
+          ${
+            level > 0
+              ? 'ml-6 before:content-[""] before:absolute before:left-[-1rem] before:top-[14px] before:w-4 before:h-px before:bg-gray-300'
+              : 'px-2'
+          }
+        `}
+        style={{ backdropFilter: 'blur(8px)' }}
         onContextMenu={(e) =>
           handleContextMenu(
             e,
@@ -111,34 +183,53 @@ export function TreeNavigation({
         }
         onClick={() => {
           if (!item?.isFile) {
-            // setIsExpanded(!isExpanded);
             onToggleFolder(item?.path);
           }
           onSelectItem(item);
         }}
       >
-        {/* Nút mở rộng/thu gọn cho thư mục */}
+        {/* Folder expand/collapse button */}
         {!item?.isFile && (
           <button
             onClick={(e) => {
               e.stopPropagation();
               setIsExpanded(!isExpanded);
             }}
-            className="p-0.5 transition-transform duration-200 hover:scale-110"
+            className={`
+              flex items-center justify-center
+              w-4 h-4 rounded-sm
+              transition-all duration-200
+              hover:bg-gray-200/70 dark:hover:bg-gray-700/30
+              ${isExpanded ? 'rotate-90 transform' : ''}
+            `}
           >
-            <i
-              className={`bi ${isExpanded ? 'bi-chevron-down' : 'bi-chevron-right'} text-xs`}
-            />
+            <i className="bi bi-chevron-right text-[10px] text-gray-400 dark:text-gray-500" />
           </button>
         )}
 
-        {/* Icon của mục */}
-        <i
-          className={`bi ${item?.icon} mr-0 transition-transform duration-200 group-hover:scale-110 text-xs`}
-        />
+        {/* Icon */}
+        <div
+          className={`
+            w-5 h-5 flex items-center justify-center
+            transition-all duration-200
+            ${item?.isFile ? 'text-blue-500/90 dark:text-blue-400/90' : 'text-amber-500/90 dark:text-amber-400/90'}
+          `}
+        >
+          {renderIcon(item?.icon) || (
+            <i
+              className={`bi ${
+                item?.isFile
+                  ? 'bi-file-earmark-text'
+                  : isExpanded
+                    ? 'bi-folder2-open'
+                    : 'bi-folder2'
+              }`}
+            />
+          )}
+        </div>
 
-        {/* Tên mục */}
-        {isEditing && editingPath === item?.path ? (
+        {/* Name/Edit input */}
+        {isEditing ? (
           <form
             className="flex-1"
             onSubmit={(e) => handleRenameSubmit(e, item?.path)}
@@ -149,14 +240,25 @@ export function TreeNavigation({
               onChange={(e) => setTempName(e.target.value)}
               placeholder={editingName}
               autoFocus
-              className="w-full px-1 py-0.5 text-xs border rounded transition-all duration-200 focus:ring focus:ring-blue-300"
-              onBlur={() => {
-                setEditingPath(null); // Tắt chế độ chỉnh sửa nếu mất focus
-              }}
+              className="
+                w-full px-2 py-1 text-sm
+                bg-white dark:bg-gray-800
+                border border-gray-200 dark:border-gray-700
+                rounded-md shadow-sm
+                focus:outline-none focus:ring-2 focus:ring-blue-400/30
+                transition-all duration-200
+              "
+              onBlur={() => setEditingPath(null)}
             />
           </form>
         ) : (
-          <span className={`flex-1 text-xs px-1 py-0.5 rounded`}>
+          <span
+            className="
+              flex-1 text-sm px-1 py-1
+              text-gray-700 dark:text-gray-200
+              truncate transition-colors duration-200
+            "
+          >
             {item?.name}
           </span>
         )}
@@ -164,15 +266,21 @@ export function TreeNavigation({
     );
   };
 
-  // Render children (đệ quy)
   const renderChildren = () => {
     if (!isExpanded) return null;
+
     const children = Object.values(folder?.children || {}).filter((child) =>
       viewMode === 'trash' ? child.deleted : !child.deleted
     );
 
     return (
-      <>
+      <div
+        className={`
+          transition-all duration-300 ease-in-out relative
+          ${isExpanded ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden'}
+          ${level > 0 ? 'border-l border-gray-300 dark:border-gray-600 ml-6' : ''}
+        `}
+      >
         {children.map((child) => (
           <TreeNavigation
             key={child?.path}
@@ -187,22 +295,56 @@ export function TreeNavigation({
             onRestore={onRestore}
             viewMode={viewMode}
             onChangeIcon={onChangeIcon}
+            onDelete={onDelete}
+            level={level + 1}
           />
         ))}
 
-        {/* Hiển thị item tạm thời */}
+        {/* Luôn hiển thị input khi tempItem được set */}
         {tempItem?.path === folder?.path && (
-          <div className="flex items-center px-2 ">
-            <i
-              className={`bi ${tempItem?.type === 'folder' ? 'bi-folder' : 'bi-file-earmark-text'} mr-2 transition-transform duration-200 group-hover:scale-110 text-xs`}
-            />
+          <div
+            className={`
+              flex items-center gap-2 relative
+              min-h-[28px] mx-1
+              ${
+                level > 0
+                  ? 'ml-3 pl-3 before:content-[""] before:absolute before:left-0 before:top-[14px] before:w-[10px] before:h-px before:bg-gray-300'
+                  : 'px-2'
+              }
+            `}
+          >
+            <div
+              className={`w-5 h-5 flex items-center justify-center ${
+                tempItem?.type === 'folder'
+                  ? 'text-amber-500/90'
+                  : 'text-blue-500/90'
+              }`}
+            >
+              <i
+                className={`bi ${
+                  tempItem?.type === 'folder'
+                    ? 'bi-folder2'
+                    : 'bi-file-earmark-text'
+                }`}
+              />
+            </div>
             <input
               type="text"
               value={tempName}
               onChange={(e) => setTempName(e.target.value)}
-              placeholder={`Enter ${tempItem?.type === 'folder' ? 'folder' : 'document'} name`}
+              placeholder={`New ${tempItem?.type}`}
               autoFocus
-              onBlur={() => setTempItem(null)} // Xóa item tạm thời nếu mất focus
+              onBlur={() => {
+                if (tempName.trim()) {
+                  if (tempItem?.type === 'folder') {
+                    onAddFolder(folder.path, tempName.trim());
+                  } else {
+                    onAddDocument(folder.path, tempName.trim());
+                  }
+                }
+                setTempItem(null);
+                setTempName('');
+              }}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && tempName.trim()) {
                   if (tempItem?.type === 'folder') {
@@ -210,31 +352,32 @@ export function TreeNavigation({
                   } else {
                     onAddDocument(folder.path, tempName.trim());
                   }
-                  setTempItem(null); // Xóa item tạm thời sau khi thêm
+                  setTempItem(null);
+                  setTempName('');
+                } else if (e.key === 'Escape') {
+                  setTempItem(null);
                   setTempName('');
                 }
               }}
-              className="w-full px-2 py-1 focus:ring focus:ring-blue-300"
+              className="
+                flex-1 px-2 py-1 text-sm
+                bg-white dark:bg-gray-800
+                border border-gray-200 dark:border-gray-700
+                rounded-md shadow-sm
+                focus:outline-none focus:ring-2 focus:ring-blue-400/30
+                transition-all duration-200
+              "
             />
           </div>
         )}
-      </>
+      </div>
     );
   };
 
   return (
     <div className="select-none">
-      {renderItem(folder)}
-      {/* {showIconPicker && (
-        <IconPicker
-          currentIcon={folder.icon}
-          onSelect={(iconName) => {
-            onChangeIcon(folder.path, iconName); // Gọi API thay đổi icon
-            setShowIconPicker(false); // Đóng picker
-          }}
-        />
-      )} */}
-      <div className="ml-4">{renderChildren()}</div>
+      {renderItem(localFolder)}
+      {renderChildren()}
 
       {contextMenu && (
         <ContextMenu
@@ -242,6 +385,7 @@ export function TreeNavigation({
           y={contextMenu.y}
           isFolder={!contextMenu.isFile}
           deleted={contextMenu.deleted}
+          currentIcon={contextMenu.currentIcon}
           onClose={() => setContextMenu(null)}
           onAddFolder={() => {
             setTempItem({ path: folder.path, type: 'folder' });
@@ -262,11 +406,7 @@ export function TreeNavigation({
             setEditingName(folder.name);
             setContextMenu(null);
           }}
-          onChangeIcon={(iconName) => {
-            const selectedPath = contextMenu.path;
-            onChangeIcon(selectedPath, iconName); // Gọi `onChangeIcon`
-            setContextMenu(null);
-          }}
+          onChangeIcon={handleIconChange}
           onDelete={() => {
             onDelete(contextMenu.path);
             setContextMenu(null);

@@ -50,13 +50,13 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   };
 
   const navItems = [
-    { icon: Home, label: 'Home', href: '/' },
-    { icon: FileText, label: 'Documents', href: '/documents' },
-    { icon: BookOpen, label: 'Projects', href: '/projects' },
-    { icon: Clock, label: 'Recent', href: '/recent' },
-    { icon: Star, label: 'Starred', href: '/starred' },
-    { icon: Bell, label: 'Notifications', href: '/notifications' },
-    { icon: Settings, label: 'Settings', href: '/settings' },
+    { icon: Home, label: 'Home', href: '/home' },
+    { icon: FileText, label: 'Collections', href: '/collections' },
+    { icon: BookOpen, label: 'Explore', href: '#' },
+    { icon: Clock, label: 'Recent', href: '#' },
+    { icon: Star, label: 'Starred', href: '#' },
+    { icon: Bell, label: 'Notifications', href: '#' },
+    { icon: Settings, label: 'Settings', href: '#' },
   ];
 
   return (

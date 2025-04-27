@@ -1,11 +1,5 @@
 import React from 'react';
-import {
-  createBrowserRouter,
-  Route,
-  Router,
-  RouterProvider,
-  Routes,
-} from 'react-router-dom';
+import { Route, Routes, BrowserRouter as Router } from 'react-router-dom';
 import { HomePage } from './pages/HomePage';
 import { ProjectPage } from './pages/ProjectPage';
 import { ToastContainer } from 'react-toastify';
@@ -17,32 +11,25 @@ import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 import Login from './pages/Login';
 import ProtectedRoute from './components/ProtectedRoute';
-// const router = createBrowserRouter([
-//   {
-//     path: '/home',
-//     element: <HomePage />,
-//   },
-//   {
-//     path: '/folder/:name',
-//     element: <ProjectPage />,
-//   },
-//   {
-//     path: '/',
-//     element: <Login />,
-//   },
-// ]);
+import { Collections } from './pages/Collections';
+import { CollectionDetail } from './components/CollectionDetail';
+import { Provider } from 'react-redux';
+// import {store} from './store';
 
 function App() {
   return (
     <>
       <ToastContainer />
-      {/* <RouterProvider router={router} /> */}
-
       <Routes>
         <Route path="/" element={<Login />} />
         <Route element={<ProtectedRoute />}>
           <Route path="/home" element={<HomePage />} />
+          <Route path="/collections" element={<Collections />} />
           <Route path="/folder/:nameFolder" element={<ProjectPage />} />
+          <Route
+            path="/collections/:collectionId"
+            element={<CollectionDetail />}
+          />
         </Route>
       </Routes>
     </>

@@ -40,7 +40,7 @@ export function DocumentView({
             <h3>${file.name}</h3>
             <div>${file.content || ''}</div>
           </div>
-          <div style="border: 1px dashed; width: 100%;height: 0px"></div>
+          <div style="border: 0px dashed; width: 100%;height: 0px"></div>
         `
       )
       .join('');

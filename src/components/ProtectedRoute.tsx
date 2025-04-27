@@ -1,21 +1,32 @@
+import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { Outlet, Navigate } from 'react-router-dom';
 import store, { RootState } from '../redux/store';
+import { setToken, setTokenPayload } from '../redux/authSlice';
 
 const ProtectedRoute = () => {
-  //   const token = localStorage.getItem('Token');
-  // const token = store.getState().auth.token;
-  // console.log(token);
-  // const state = store.getState();
-  // console.log('Updated state:', state);
   const token = useSelector((state: RootState) => state.auth.token);
-  // // console.log('Token from Redux:', token);
-  // const tokenPayload = useSelector(
-  //   (state: RootState) => state.auth.tokenPayload
-  // );
-  // console.log('Token from Redux:', tokenPayload);
 
-  return token ? <Outlet /> : <Navigate to="/" />;
+  useEffect(() => {
+    // Nếu không có token trong Redux store, kiểm tra localStorage
+    if (!token) {
+      const storedToken = localStorage.getItem('token');
+      const storedTokenPayload = localStorage.getItem('tokenPayload');
+
+      if (storedToken && storedTokenPayload) {
+        // Khôi phục token vào Redux store
+        store.dispatch(setToken({ token: storedToken }));
+        store.dispatch(
+          setTokenPayload({ tokenPayload: JSON.parse(storedTokenPayload) })
+        );
+      }
+    }
+  }, [token]);
+
+  // Kiểm tra token từ cả Redux store và localStorage
+  const isAuthenticated = token || localStorage.getItem('token');
+
+  return isAuthenticated ? <Outlet /> : <Navigate to="/" />;
 };
 
 export default ProtectedRoute;

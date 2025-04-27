@@ -38,8 +38,10 @@ AxiosInstance.interceptors.response.use(
   },
   (error) => {
     if (error.response && error.response.status === 401) {
-      // Xử lý lỗi 401 (Unauthorized)
+      // Xóa thông tin auth khỏi Redux store và localStorage
       store.dispatch(clearAuth()); // Xóa thông tin auth khỏi Redux store
+      localStorage.removeItem('token'); // Xóa token khỏi localStorage
+      localStorage.removeItem('tokenPayload'); // Xóa tokenPayload khỏi localStorage
       window.location.href = '/'; // Chuyển hướng về trang đăng nhập
     }
     return Promise.reject(error); // Trả về lỗi để xử lý tiếp

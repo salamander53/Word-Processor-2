@@ -27,6 +27,13 @@ function Login() {
       if (response.data) {
         console.log('Login response:', response.data);
 
+        // Lưu token vào localStorage
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem(
+          'tokenPayload',
+          JSON.stringify(response.data.tokenPayload)
+        );
+
         // Lưu token và tokenPayload vào Redux store
         store.dispatch(setToken({ token: response.data.token }));
         store.dispatch(

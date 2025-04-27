@@ -33,8 +33,6 @@ export function ContextMenu({
   onDelete,
 }: ContextMenuProps) {
   const [showIconPicker, setShowIconPicker] = useState(false);
-  const [isNaming, setIsNaming] = useState(false);
-  const [newName, setNewName] = useState('');
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -58,14 +56,13 @@ export function ContextMenu({
           y + 250 > window.innerHeight ? -100 : 0
         }%)`,
       }}
-      // onMouseLeave={onClose} // Đóng menu khi chuột rời khỏi
     >
       {isFolder && !deleted && (
         <>
           <button
             onClick={() => {
               onAddFolder?.();
-              onClose(); // Đóng context menu sau khi chọn
+              onClose();
             }}
             className="w-full px-4 py-2 text-left flex items-center gap-2 hover:bg-gray-100"
           >
@@ -75,7 +72,7 @@ export function ContextMenu({
           <button
             onClick={() => {
               onAddDocument?.();
-              onClose(); // Đóng context menu sau khi chọn
+              onClose();
             }}
             className="w-full px-4 py-2 text-left flex items-center gap-2 hover:bg-gray-100"
           >
@@ -92,21 +89,21 @@ export function ContextMenu({
         <i className="bi bi-pencil w-4 h-4"></i>
         <span>Rename</span>
       </button>
-      <div
-        onMouseEnter={() => setShowIconPicker(true)}
-        onMouseLeave={() => setShowIconPicker(false)}
-        // onClick={() => setShowIconPicker(!showIconPicker)}
-        className="relative w-full px-4 py-2 text-left flex items-center gap-2 hover:bg-gray-100"
-      >
-        <i className="bi bi-image w-4 h-4"></i>
-        <span>Change Icon</span>
+
+      <div className="relative w-full">
+        <button
+          onClick={() => setShowIconPicker(!showIconPicker)}
+          className="w-full px-4 py-2 text-left flex items-center gap-2 hover:bg-gray-100"
+        >
+          <i className="bi bi-image w-4 h-4"></i>
+          <span>Change Icon</span>
+        </button>
+
         {showIconPicker && (
           <div
-            className="absolute left-full bg-white shadow-lg rounded-lg z-50"
+            className="icon-picker absolute left-full top-0 bg-white shadow-lg rounded-lg z-50"
             style={{
-              marginLeft: '0.2rem',
-              borderTop: `${x}px`, // Điều chỉnh vị trí bảng cao hơn
-              height: '400px',
+              marginLeft: '0.5rem',
             }}
           >
             <IconPicker
@@ -114,11 +111,13 @@ export function ContextMenu({
               onSelect={(iconName) => {
                 onChangeIcon(iconName);
                 setShowIconPicker(false);
+                onClose();
               }}
             />
           </div>
         )}
       </div>
+
       <div className="border-t border-gray-200 my-1" />
       {deleted ? (
         <>
